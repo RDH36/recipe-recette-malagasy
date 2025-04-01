@@ -1,50 +1,56 @@
-# Welcome to your Expo app 👋
+# Recipe-Recette-Malagasy 🇲🇬
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Bienvenue sur **Recipe-Recette-Malagasy**, une application mobile qui vous fait découvrir les recettes originales et authentiques de Madagascar.
 
-## Get started
+## À propos du projet
 
-1. Install dependencies
+Recipe-Recette-Malagasy est une application [Expo](https://expo.dev) qui présente la richesse culinaire malgache. Découvrez les saveurs uniques, les techniques de préparation traditionnelles et l'histoire derrière chaque plat emblématique de la Grande Île.
+
+## Fonctionnalités
+
+- Catalogue complet de recettes malgaches traditionnelles
+- Instructions détaillées étape par étape
+- Information sur les ingrédients locaux et leurs substituts
+- Catégorisation par région et type de plat
+- Possibilité de sauvegarder vos recettes favorites
+
+## Démarrage rapide
+
+1. Installer les dépendances
 
    ```bash
-   npm install
+   pnpm install
    ```
 
-2. Start the app
+2. Lancer l'application
 
    ```bash
-    npx expo start
+   pnpm exec expo start
    ```
 
-In the output, you'll find options to open the app in a
+Vous pouvez ensuite ouvrir l'application sur:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Un [build de développement](https://docs.expo.dev/develop/development-builds/introduction/)
+- Un [émulateur Android](https://docs.expo.dev/workflow/android-studio-emulator/)
+- Un [simulateur iOS](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Structure du projet
 
-## Get a fresh project
+L'application utilise le [routage basé sur les fichiers](https://docs.expo.dev/router/introduction/) d'Expo. Vous trouverez les principaux composants dans le répertoire **app**.
 
-When you're ready, run:
+## Contribution
 
-```bash
-npm run reset-project
-```
+Nous accueillons toute contribution pour enrichir notre collection de recettes malgaches. Si vous connaissez des recettes authentiques ou des variantes régionales, n'hésitez pas à contribuer!
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Ressources
 
-## Learn more
+- [Documentation Expo](https://docs.expo.dev/)
+- [Tutoriel Expo](https://docs.expo.dev/tutorial/introduction/)
 
-To learn more about developing your project with Expo, look at the following resources:
+## Contact
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Pour toute question ou suggestion concernant l'application Recipe-Recette-Malagasy, rejoignez notre communauté:
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [GitHub](https://github.com/votre-username/recipe-recette-malagasy)
+- [Discord](https://chat.expo.dev)
