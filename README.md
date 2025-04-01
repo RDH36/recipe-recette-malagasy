@@ -52,5 +52,5 @@ Nous accueillons toute contribution pour enrichir notre collection de recettes m
 
 Pour toute question ou suggestion concernant l'application Recipe-Recette-Malagasy, rejoignez notre communauté:
 
-- [GitHub](https://github.com/votre-username/recipe-recette-malagasy)
+- [GitHub](https://github.com/RDH36/recipe-recette-malagasy.git)
 - [Discord](https://chat.expo.dev)
