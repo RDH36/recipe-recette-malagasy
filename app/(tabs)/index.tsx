@@ -3,8 +3,9 @@ import Header from "@/components/Header/Header";
 import { RecipeCard } from "@/components/RecipeCard/RecipeCard";
 import Search from "@/components/Search/Search";
 import { sampleRecipes } from "@/data/sample-data";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, View } from "react-native";
 
 export default function Index() {
   const [recipes, setRecipes] = useState<Recipe[]>(sampleRecipes);
@@ -17,10 +18,8 @@ export default function Index() {
 
     setLoading(true);
     try {
-      // Simuler un appel API
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Pour la démonstration, on duplique les recettes existantes
       const newRecipes = [...sampleRecipes].map((recipe) => ({
         ...recipe,
         id: `${recipe.id}-${page}`,
@@ -29,7 +28,6 @@ export default function Index() {
       setRecipes((prev) => [...prev, ...newRecipes]);
       setPage((prev) => prev + 1);
 
-      // Arrêter le chargement après 5 pages pour la démonstration
       if (page >= 5) {
         setHasMore(false);
       }
@@ -44,7 +42,7 @@ export default function Index() {
     (event: any) => {
       const { layoutMeasurement, contentOffset, contentSize } =
         event.nativeEvent;
-      const paddingToBottom = 20;
+      const paddingToBottom = 100;
       const isCloseToBottom =
         layoutMeasurement.height + contentOffset.y >=
         contentSize.height - paddingToBottom;
@@ -74,11 +72,16 @@ export default function Index() {
           scrollEventThrottle={400}
         >
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} isFavorite={false} />
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              isFavorite={false}
+              onPress={() => router.push(`/recipe/${recipe.id}`)}
+            />
           ))}
           {loading && (
             <View className="py-4">
-              <ActivityIndicator size="large" color="#0000ff" />
+              <ActivityIndicator size="large" color="#000000" />
             </View>
           )}
         </ScrollView>
@@ -86,9 +89,3 @@ export default function Index() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  overflowScroll: {
-    overflow: "scroll",
-  },
-});

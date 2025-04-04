@@ -1,5 +1,5 @@
 import { Recipe } from "@/Types/RecipeType";
-import { Clock, Heart } from "lucide-react-native";
+import { ChefHatIcon, Clock, Heart, TagIcon } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
@@ -38,19 +38,21 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
       <View className="p-4">
         <Text className="text-xl font-semibold mb-2">{recipe.title}</Text>
 
-        <View className="flex-row space-x-4 mb-2 gap-4">
+        <View className="flex-row space-x-4 mb-2 gap-4 mt-2">
           <View className="flex-row items-center gap-2">
             <Clock className="text-gray-600 " size={16} />
             <Text className="text-sm text-gray-600 border border-gray-200 rounded-xl px-2 py-1 font-bold">
               {recipe.time} min
             </Text>
           </View>
-          <View>
+          <View className="flex-row items-center gap-2">
+            <ChefHatIcon size={16} color="gray" />
             <Text className="text-sm text-gray-600 border border-gray-200 rounded-xl px-2 py-1 font-bold">
               {recipe.difficulty}
             </Text>
           </View>
-          <View>
+          <View className="flex-row items-center gap-2">
+            <TagIcon size={16} color="gray" />
             <Text className="text-sm text-gray-600 border border-gray-200 rounded-xl px-2 py-1 font-bold">
               {recipe.category}
             </Text>
