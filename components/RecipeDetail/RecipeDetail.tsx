@@ -1,5 +1,5 @@
-import { Recipe } from "@/Types/RecipeType";
-import { useNavigation } from "@react-navigation/native";
+import { Recipe } from "@/Types/RecipeType"
+import { useNavigation } from "@react-navigation/native"
 import {
   ArrowLeftIcon,
   ChefHatIcon,
@@ -7,22 +7,22 @@ import {
   HeartIcon,
   ShareIcon,
   TagIcon,
-} from "lucide-react-native";
-import React, { useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+} from "lucide-react-native"
+import React, { useState } from "react"
+import { Image, Text, TouchableOpacity, View } from "react-native"
 
 interface RecipeDetailProps {
-  recipe: Recipe;
+  recipe: Recipe
 }
 
 const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
-  const navigation = useNavigation();
-  const [switchTab, setSwitchTab] = useState(true);
+  const navigation = useNavigation()
+  const [switchTab, setSwitchTab] = useState(true)
 
   return (
     <View className="flex-1 bg-white">
       {/* Header avec image */}
-      <View className="relative h-72">
+      <View className="relative h-[400px]">
         <Image
           source={require("@/assets/images/placeholder.png")}
           className="w-full h-full opacity-75 rounded-t-2xl"
@@ -117,7 +117,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
         )}
       </View>
     </View>
-  );
-};
+  )
+}
 
-export default RecipeDetail;
+export default RecipeDetail

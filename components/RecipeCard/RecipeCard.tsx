@@ -1,12 +1,12 @@
-import { Recipe } from "@/Types/RecipeType";
-import { ChefHatIcon, Clock, Heart, TagIcon } from "lucide-react-native";
-import React from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Recipe } from "@/Types/RecipeType"
+import { ChefHatIcon, Clock, Heart, TagIcon } from "lucide-react-native"
+import React from "react"
+import { Image, Text, TouchableOpacity, View } from "react-native"
 
 interface RecipeCardProps {
-  recipe: Recipe;
-  isFavorite: boolean;
-  onPress?: () => void;
+  recipe: Recipe
+  isFavorite: boolean
+  onPress?: () => void
 }
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -15,12 +15,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   isFavorite,
 }) => {
   return (
-    <View className="bg-white rounded-2xl shadow-md w-full max-w-sm">
-      <View className="relative">
-        <View className="relative">
+    <View className="flex bg-white rounded-2xl shadow-md w-full h-[400px]">
+      <View className="relative flex-1">
+        <View className="relative h-full">
           <Image
             source={require("@/assets/images/placeholder.png")}
-            className="w-full h-40 opacity-75 rounded-t-2xl"
+            className="w-full h-full opacity-75 rounded-t-2xl"
             resizeMode="cover"
             style={{ tintColor: "black" }}
           />
@@ -73,5 +73,5 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         </TouchableOpacity>
       </View>
     </View>
-  );
-};
+  )
+}

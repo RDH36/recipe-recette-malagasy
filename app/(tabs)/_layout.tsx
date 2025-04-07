@@ -1,5 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons"
+import { Tabs } from "expo-router"
+import { Pressable } from "react-native"
 
 export default function TabsLayout() {
   return (
@@ -9,17 +10,24 @@ export default function TabsLayout() {
           headerShown: false,
           tabBarStyle: {
             backgroundColor: "#fff",
-            borderTopWidth: 1,
+            borderTopWidth: 0.5,
             borderTopColor: "#e5e5e5",
           },
           tabBarActiveTintColor: "#000",
           tabBarInactiveTintColor: "#999",
+          tabBarButton: (props) => (
+            <Pressable
+              {...props}
+              android_ripple={{ color: "transparent" }}
+              style={({ pressed }) => [props.style, pressed && { opacity: 1 }]}
+            />
+          ),
         }}
       >
         <Tabs.Screen
           name="index"
           options={{
-            title: "",
+            title: "Home",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
                 name={focused ? "home" : "home-outline"}
@@ -33,7 +41,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="bookmarks/bookmarks"
           options={{
-            title: "",
+            title: "Favorites",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
                 name={focused ? "bookmark" : "bookmark-outline"}
@@ -47,7 +55,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="settings/settings"
           options={{
-            title: "",
+            title: "Settings",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
                 name={focused ? "settings" : "settings-outline"}
@@ -60,5 +68,5 @@ export default function TabsLayout() {
         />
       </Tabs>
     </>
-  );
+  )
 }
