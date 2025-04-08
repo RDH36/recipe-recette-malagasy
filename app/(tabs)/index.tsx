@@ -5,7 +5,13 @@ import Search from "@/components/Search/Search"
 import { sampleRecipes } from "@/data/sample-data"
 import { router } from "expo-router"
 import { useCallback, useState } from "react"
-import { ActivityIndicator, ScrollView, View } from "react-native"
+import {
+  ActivityIndicator,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Text,
+} from "react-native"
 
 export default function Index() {
   const [recipes, setRecipes] = useState<Recipe[]>(sampleRecipes)
@@ -55,9 +61,9 @@ export default function Index() {
   )
 
   return (
-    <View className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
+    <View className="flex justify-center items-center min-h-screen bg-white px-4 rounded">
       <View className="flex flex-col h-full w-full gap-4">
-        <View className="flex flex-col p-4 border-b border-gray-200 w-screen -mx-4 gap-3">
+        <View className="flex flex-col p-4 border-b border-gris-ardoise/20 w-screen -mx-4 gap-3 bg-creme-vanille">
           <Header />
         </View>
         <ScrollView
@@ -80,7 +86,7 @@ export default function Index() {
           ))}
           {loading && (
             <View className="py-4">
-              <ActivityIndicator size="large" color="#000000" />
+              <ActivityIndicator size="large" color="#D4A373" />
             </View>
           )}
         </ScrollView>

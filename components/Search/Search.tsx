@@ -5,12 +5,13 @@ import { TextInput, View } from "react-native"
 export default function Search() {
   return (
     <View className="relative flex flex-1 items-center">
-      <SearchIcon className="absolute left-3 top-2 z-10 h-4 w-4 text-gray-400" />
+      <SearchIcon className="absolute left-3 top-2 z-10 h-4 w-4 text-gris-ardoise" />
       <TextInput
         placeholder="Search recipes..."
-        className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gray-200 bg-white text-sm shadow-sm"
+        className="w-full pl-11 pr-4 py-2.5 rounded-full border border-gris-ardoise/20 bg-creme-vanille text-sm shadow-sm text-brun-cacao"
         autoFocus
         enterKeyHint="search"
+        placeholderTextColor="#7B8C8C"
       />
     </View>
   )

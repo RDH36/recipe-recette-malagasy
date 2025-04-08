@@ -1,4 +1,4 @@
-import { Recipe } from "@/Types/RecipeType";
+import { Recipe } from "@/Types/RecipeType"
 
 export const sampleRecipes: Recipe[] = [
   {
@@ -6,7 +6,7 @@ export const sampleRecipes: Recipe[] = [
     title: "Romazava",
     description:
       "A traditional Malagasy beef and vegetable stew with brèdes mafana (Malagasy greens).",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/recipe-image/Romazava.webp"),
     time: 60,
     difficulty: "Medium",
     category: "malagasy",
@@ -34,7 +34,7 @@ export const sampleRecipes: Recipe[] = [
     title: "Ravitoto",
     description:
       "A classic Malagasy dish made with pounded cassava leaves and pork.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 90,
     difficulty: "Medium",
     category: "malagasy",
@@ -61,7 +61,7 @@ export const sampleRecipes: Recipe[] = [
     title: "Mofo Gasy",
     description:
       "Traditional Malagasy rice flour pancakes, often served for breakfast or as a snack.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 30,
     difficulty: "Easy",
     category: "malagasy",
@@ -90,7 +90,7 @@ export const sampleRecipes: Recipe[] = [
     title: "5-Minute Microwave Mac & Cheese",
     description:
       "A super quick and easy mac and cheese recipe perfect for busy students.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 5,
     difficulty: "Easy",
     category: "student",
@@ -115,7 +115,7 @@ export const sampleRecipes: Recipe[] = [
     title: "Quick Vegetable Stir Fry",
     description:
       "A healthy and quick vegetable stir fry that can be prepared in minutes.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 15,
     difficulty: "Easy",
     category: "quick",
@@ -142,7 +142,7 @@ export const sampleRecipes: Recipe[] = [
     title: "Ramen Noodle Upgrade",
     description:
       "Transform instant ramen into a delicious meal with simple additions.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 10,
     difficulty: "Easy",
     category: "student",
@@ -168,7 +168,7 @@ export const sampleRecipes: Recipe[] = [
     title: "Chickpea Salad Sandwich",
     description:
       "A protein-packed vegetarian sandwich that's quick to prepare.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 10,
     difficulty: "Easy",
     category: "vegetarian",
@@ -196,7 +196,7 @@ export const sampleRecipes: Recipe[] = [
     title: "15-Minute Pasta Aglio e Olio",
     description:
       "A classic Italian pasta dish with garlic and olive oil that's ready in minutes.",
-    image: "/placeholder.svg?height=400&width=600",
+    image: require("@/assets/images/placeholder.png"),
     time: 15,
     difficulty: "Easy",
     category: "quick",
@@ -220,4 +220,4 @@ export const sampleRecipes: Recipe[] = [
     ],
     isPremium: true,
   },
-];
+]

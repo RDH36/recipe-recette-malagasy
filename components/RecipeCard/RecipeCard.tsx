@@ -1,5 +1,7 @@
 import { Recipe } from "@/Types/RecipeType"
 import { ChefHatIcon, Clock, Heart, TagIcon } from "lucide-react-native"
+import { StyleSheet } from "nativewind"
+import { LinearGradient } from "expo-linear-gradient"
 import React from "react"
 import { Image, Text, TouchableOpacity, View } from "react-native"
 
@@ -15,63 +17,73 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   isFavorite,
 }) => {
   return (
-    <View className="flex bg-white rounded-2xl shadow-md w-full h-[400px]">
-      <View className="relative flex-1">
-        <View className="relative h-full">
-          <Image
-            source={require("@/assets/images/placeholder.png")}
-            className="w-full h-full opacity-75 rounded-t-2xl"
-            resizeMode="cover"
-            style={{ tintColor: "black" }}
-          />
-          <View className="absolute top-0 left-0 right-0 bottom-0 bg-black opacity-20 rounded-t-2xl" />
-        </View>
-        <TouchableOpacity className="absolute top-2 right-2 p-2 z-50 bg-white rounded-full shadow-md">
-          <Heart
-            className="text-black"
-            size={24}
-            fill={isFavorite ? "red" : "none"}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View className="p-4">
-        <Text className="text-xl font-semibold mb-2">{recipe.title}</Text>
-
-        <View className="flex-row space-x-4 mb-2 gap-4 mt-2">
-          <View className="flex-row items-center gap-2">
-            <Clock className="text-gray-600 " size={16} />
-            <Text className="text-sm text-gray-600 border border-gray-200 rounded-xl px-2 py-1 font-bold">
-              {recipe.time} min
-            </Text>
+    <TouchableOpacity onPress={onPress} className="w-full">
+      <View className="flex bg-white rounded-3xl shadow-sm w-full border border-ocre-miel/20">
+        <View className="relative">
+          <View className="relative w-full h-[250px]">
+            <Image
+              source={recipe.image}
+              className="w-full h-full rounded-t-3xl"
+              resizeMode="cover"
+            />
+            <View className="absolute top-0 left-0 right-0 bottom-0 bg-ocre-miel/20 rounded-t-2xl" />
           </View>
-          <View className="flex-row items-center gap-2">
-            <ChefHatIcon size={16} color="gray" />
-            <Text className="text-sm text-gray-600 border border-gray-200 rounded-xl px-2 py-1 font-bold">
-              {recipe.difficulty}
-            </Text>
+          <View className="absolute top-4 right-4 flex-row gap-2 bg-white rounded-full p-2 items-center justify-center">
+            <TouchableOpacity>
+              <Heart
+                size={24}
+                className="text-brun-cacao"
+                fill={isFavorite ? "#3E3E3E" : "none"}
+              />
+            </TouchableOpacity>
           </View>
-          <View className="flex-row items-center gap-2">
-            <TagIcon size={16} color="gray" />
-            <Text className="text-sm text-gray-600 border border-gray-200 rounded-xl px-2 py-1 font-bold">
-              {recipe.category}
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.5)"]}
+            style={styles.gradientOverlay}
+          >
+            <Text className="text-white font-bold text-3xl">
+              {recipe.title}
             </Text>
-          </View>
+          </LinearGradient>
         </View>
 
-        <Text className="text-gray-600 text-sm" numberOfLines={2}>
-          {recipe.description}
-        </Text>
+        <View className="p-4">
+          <View className="flex-row gap-2 mb-2">
+            <View className="bg-beige-amande rounded-full px-3 py-1 flex-row items-center gap-2">
+              <Clock className="text-brun-cacao" size={16} />
+              <Text className="text-sm text-brun-cacao">{recipe.time} min</Text>
+            </View>
+            <View className="bg-beige-amande rounded-full px-3 py-1 flex-row items-center gap-2">
+              <ChefHatIcon size={16} color="#3E3E3E" />
+              <Text className="text-sm text-brun-cacao">
+                {recipe.difficulty}
+              </Text>
+            </View>
+            <View className="bg-beige-amande rounded-full px-3 py-1 flex-row items-center gap-2">
+              <TagIcon size={16} color="#3E3E3E" />
+              <Text className="text-sm text-brun-cacao">{recipe.category}</Text>
+            </View>
+          </View>
 
-        <TouchableOpacity
-          onPress={onPress}
-          className="mt-4 bg-black py-2 rounded-lg"
-        >
-          <Text className="text-white text-center font-medium">
-            View Recipe
+          <Text className="text-brun-cacao text-sm mb-4" numberOfLines={2}>
+            {recipe.description}
           </Text>
-        </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   )
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "white",
+    borderRadius: 16,
+  },
+  gradientOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+  },
+})

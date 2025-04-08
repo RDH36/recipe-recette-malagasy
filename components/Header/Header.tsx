@@ -5,9 +5,11 @@ import { Text, TouchableOpacity, View } from "react-native"
 export default function Header() {
   return (
     <View className="flex flex-row justify-between items-center px-1">
-      <Text className="text-3xl font-bold">Recipe Malagasy</Text>
+      <Text className="text-3xl font-bold text-brun-cacao">
+        Recipe Malagasy
+      </Text>
       <TouchableOpacity onPress={() => router.push("/search/Search")}>
-        <SearchIcon className="h-4 w-4 text-black" />
+        <SearchIcon className="h-4 w-4 text-gris-ardoise" />
       </TouchableOpacity>
     </View>
   )
