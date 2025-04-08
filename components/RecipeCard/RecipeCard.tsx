@@ -20,7 +20,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
     <TouchableOpacity onPress={onPress} className="w-full">
       <View className="flex bg-white rounded-3xl shadow-sm w-full border border-ocre-miel/20">
         <View className="relative">
-          <View className="relative w-full h-[250px]">
+          <View className="relative h-[250px]">
             <Image
               source={recipe.image}
               className="w-full h-full rounded-t-3xl"

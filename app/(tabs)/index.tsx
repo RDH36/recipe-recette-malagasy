@@ -63,7 +63,7 @@ export default function Index() {
   return (
     <View className="flex justify-center items-center min-h-screen bg-white px-4 rounded">
       <View className="flex flex-col h-full w-full gap-4">
-        <View className="flex flex-col p-4 border-b border-gris-ardoise/20 w-screen -mx-4 gap-3 bg-creme-vanille">
+        <View className="flex flex-col justify-center px-4 border-b border-gris-ardoise/20 w-screen -mx-4 gap-3 bg-creme-vanille">
           <Header />
         </View>
         <ScrollView
