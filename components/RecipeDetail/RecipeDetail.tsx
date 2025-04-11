@@ -20,7 +20,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
   const [switchTab, setSwitchTab] = useState(true)
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-neutral-white">
       {/* Header avec image */}
       <View className="relative h-[400px]">
         <Image
@@ -28,21 +28,21 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
           className="w-full h-full opacity-75 rounded-t-2xl"
           resizeMode="cover"
         />
-        <View className="absolute top-0 left-0 right-0 bottom-0 bg-ocre-miel/20 rounded-t-2xl" />
+        <View className="absolute top-0 left-0 right-0 bottom-0 bg-primary-light/20 rounded-t-2xl" />
 
         <View className="absolute top-5 w-full flex-row justify-between items-center px-4">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            className="bg-white rounded-full p-2"
+            className="bg-neutral-white rounded-full p-2"
           >
-            <ArrowLeftIcon size={20} color="#3E3E3E" />
+            <ArrowLeftIcon size={20} className="text-text-primary" />
           </TouchableOpacity>
           <View className="flex-row gap-4">
-            <TouchableOpacity className="bg-white rounded-full p-2">
-              <HeartIcon size={20} color="#3E3E3E" />
+            <TouchableOpacity className="bg-neutral-white rounded-full p-2">
+              <HeartIcon size={20} className="text-text-primary" />
             </TouchableOpacity>
-            <TouchableOpacity className="bg-white rounded-full p-2">
-              <ShareIcon size={20} color="#3E3E3E" />
+            <TouchableOpacity className="bg-neutral-white rounded-full p-2">
+              <ShareIcon size={20} className="text-text-primary" />
             </TouchableOpacity>
           </View>
         </View>
@@ -50,40 +50,44 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
 
       {/* Contenu */}
       <View className="flex-1 px-4 pt-4">
-        <Text className="text-3xl font-bold">{recipe.title}</Text>
+        <Text className="text-3xl font-bold text-text-primary">
+          {recipe.title}
+        </Text>
 
         {/* Métadonnées */}
         <View className="flex-row space-x-4 mb-2 gap-4 mt-2">
-          <View className="bg-beige-amande rounded-full px-3 py-1 flex-row items-center gap-2">
-            <Clock className="text-brun-cacao" size={16} />
-            <Text className="text-sm text-brun-cacao">{recipe.time} min</Text>
+          <View className="bg-secondary-light rounded-full px-3 py-1 flex-row items-center gap-2">
+            <Clock className="text-text-primary" size={16} />
+            <Text className="text-sm text-text-primary">{recipe.time} min</Text>
           </View>
-          <View className="bg-beige-amande rounded-full px-3 py-1 flex-row items-center gap-2">
-            <ChefHatIcon size={16} color="#3E3E3E" />
-            <Text className="text-sm text-brun-cacao">{recipe.difficulty}</Text>
+          <View className="bg-secondary-light rounded-full px-3 py-1 flex-row items-center gap-2">
+            <ChefHatIcon size={16} className="text-text-primary" />
+            <Text className="text-sm text-text-primary">
+              {recipe.difficulty}
+            </Text>
           </View>
-          <View className="bg-beige-amande rounded-full px-3 py-1 flex-row items-center gap-2">
-            <TagIcon size={16} color="#3E3E3E" />
-            <Text className="text-sm text-brun-cacao">{recipe.category}</Text>
+          <View className="bg-secondary-light rounded-full px-3 py-1 flex-row items-center gap-2">
+            <TagIcon size={16} className="text-text-primary" />
+            <Text className="text-sm text-text-primary">{recipe.category}</Text>
           </View>
         </View>
 
         {/* Description */}
-        <Text className="mt-4 text-brun-cacao">{recipe.description}</Text>
+        <Text className="mt-4 text-text-primary">{recipe.description}</Text>
 
         {/* Onglets */}
-        <View className="flex-row mt-6 border-b border-ocre-miel/20">
+        <View className="flex-row mt-6 border-b border-primary-light/20">
           <TouchableOpacity
             onPress={() => setSwitchTab(true)}
             className={
-              switchTab ? "pb-2 border-b-2 border-ocre-miel" : "mr-6 pb-2"
+              switchTab ? "pb-2 border-b-2 border-primary" : "mr-6 pb-2"
             }
           >
             <Text
               className={
                 switchTab
-                  ? "font-semibold text-brun-cacao"
-                  : "text-brun-cacao/40"
+                  ? "font-semibold text-text-primary"
+                  : "text-text-disabled"
               }
             >
               Ingredients
@@ -92,14 +96,14 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
           <TouchableOpacity
             onPress={() => setSwitchTab(false)}
             className={
-              switchTab ? "ml-6 pb-2" : "pb-2 border-b-2 border-ocre-miel"
+              switchTab ? "ml-6 pb-2" : "pb-2 border-b-2 border-primary"
             }
           >
             <Text
               className={
                 switchTab
-                  ? "text-brun-cacao/40"
-                  : "font-semibold text-brun-cacao"
+                  ? "text-text-disabled"
+                  : "font-semibold text-text-primary"
               }
             >
               Instructions
@@ -110,7 +114,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
         {switchTab ? (
           <View className="mt-4">
             {recipe.ingredients.map((ingredient, index) => (
-              <Text key={index} className="text-brun-cacao py-2">
+              <Text key={index} className="text-text-primary py-2">
                 • {ingredient}
               </Text>
             ))}
@@ -118,7 +122,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
         ) : (
           <View className="mt-4">
             {recipe.instructions.map((instruction, index) => (
-              <Text key={index} className="text-brun-cacao py-2">
+              <Text key={index} className="text-text-primary py-2">
                 • {instruction}
               </Text>
             ))}

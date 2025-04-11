@@ -9,12 +9,12 @@ export default function TabsLayout() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            backgroundColor: "#FDF6ED",
+            backgroundColor: "#FFFFFF",
             borderTopWidth: 0.5,
-            borderTopColor: "#7B8C8C20",
+            borderTopColor: "rgba(97, 97, 97, 0.2)",
           },
-          tabBarActiveTintColor: "#D4A373",
-          tabBarInactiveTintColor: "#7B8C8C",
+          tabBarActiveTintColor: "#FF8050",
+          tabBarInactiveTintColor: "#757575",
           tabBarButton: (props) => (
             <Pressable
               {...props}
