@@ -1,21 +1,20 @@
-import { View, ImageBackground } from "react-native"
-import { StyleSheet } from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
-import { Text } from "expo-dynamic-fonts"
+import { Text } from "expo-dynamic-fonts";
+import { LinearGradient } from "expo-linear-gradient";
+import { ImageBackground, StyleSheet, View } from "react-native";
 
 export default function Banner() {
   return (
-    <View className="relative w-full h-[200px] overflow-hidden">
+    <View className="relative w-full h-[200px] overflow-hidden p-2">
       <ImageBackground
         source={require("../../assets/images/banner.png")}
-        className="w-full h-full"
+        className="w-full h-full rounded-2xl overflow-hidden"
         resizeMode="cover"
       >
         <LinearGradient
           colors={["rgba(0, 0, 0, 0.7)", "rgba(0, 0, 0, 0)"]}
           start={{ x: 0, y: 1 }}
           end={{ x: 0, y: 0 }}
-          style={StyleSheet.absoluteFillObject}
+          style={[StyleSheet.absoluteFillObject, { borderRadius: 20 }]}
         />
 
         <View className="absolute bottom-4 left-4 right-4">
@@ -41,11 +40,11 @@ export default function Banner() {
         </View>
       </ImageBackground>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 32,
+    fontSize: 25,
   },
-})
+});

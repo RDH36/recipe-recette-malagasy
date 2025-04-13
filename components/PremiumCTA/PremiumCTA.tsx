@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
-import { Crown, Check, BadgeCheck } from "lucide-react-native"
-import { LinearGradient } from "expo-linear-gradient"
+import { LinearGradient } from "expo-linear-gradient";
+import { BadgeCheck, Crown } from "lucide-react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function PremiumCTA() {
   return (
@@ -46,7 +46,7 @@ export default function PremiumCTA() {
         </TouchableOpacity>
       </LinearGradient>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     display: "flex",
     justifyContent: "center",
-    gap: 10,
+    gap: 1,
   },
-})
+});

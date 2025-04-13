@@ -1,15 +1,15 @@
-import RecipeDetail from "@/components/RecipeDetail/RecipeDetail"
-import { sampleRecipes } from "@/data/sample-data"
-import { Recipe } from "@/Types/RecipeType"
-import { router, useLocalSearchParams } from "expo-router"
-import { useState } from "react"
-import { ScrollView, Text, TouchableOpacity, View } from "react-native"
+import RecipeDetail from "@/components/RecipeDetail/RecipeDetail";
+import { sampleRecipes } from "@/data/sample-data";
+import { Recipe } from "@/Types/RecipeType";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function RecipeDetails() {
-  const { id } = useLocalSearchParams()
-  const [recipes, setRecipes] = useState<Recipe[]>(sampleRecipes)
+  const { id } = useLocalSearchParams();
+  const [recipes, setRecipes] = useState<Recipe[]>(sampleRecipes);
 
-  const recipe = recipes.find((recipe) => recipe.id === id)
+  const recipe = recipes.find((recipe) => recipe.id === id);
 
   if (!recipe) {
     return (
@@ -22,12 +22,12 @@ export default function RecipeDetails() {
           <Text className="text-neutral-white">Back</Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   return (
     <ScrollView className="flex-1 bg-neutral-white">
-      <View className="p-2">{<RecipeDetail recipe={recipe} />}</View>
+      <View>{<RecipeDetail recipe={recipe} />}</View>
     </ScrollView>
-  )
+  );
 }

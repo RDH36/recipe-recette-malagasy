@@ -1,43 +1,35 @@
-import Search from "@/components/Search/Search"
-import { router, useNavigation } from "expo-router"
-import { ArrowLeftIcon, ChevronDown } from "lucide-react-native"
-import React, { useState } from "react"
-import { Text, TouchableOpacity, View, ScrollView } from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
-import { RecipeCard } from "@/components/RecipeCard/RecipeCard"
-import { sampleRecipes } from "@/data/sample-data"
+import { RecipeCard } from "@/components/RecipeCard/RecipeCard";
+import Search from "@/components/Search/Search";
+import { sampleRecipes } from "@/data/sample-data";
+import { router, useNavigation } from "expo-router";
+import { ArrowLeftIcon, ChevronDown } from "lucide-react-native";
+import React, { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"]
+const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"];
 const sortOptions = [
   "Plus récent",
   "Plus populaire",
   "Temps de préparation",
   "Niveau de difficulté",
-]
+];
 
 export default function SearchPage() {
-  const navigation = useNavigation()
-  const [selectedFilter, setSelectedFilter] = useState("Tous")
-  const [showSortOptions, setShowSortOptions] = useState(false)
-  const [selectedSort, setSelectedSort] = useState("Plus récent")
+  const navigation = useNavigation();
+  const [selectedFilter, setSelectedFilter] = useState("Tous");
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [selectedSort, setSelectedSort] = useState("Plus récent");
 
   return (
-    <View className="flex gap-2 bg-neutral-white">
-      <LinearGradient
-        colors={["#FFD54F", "#FF7A29"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        className="p-4"
-      >
-        <View className="flex-row items-center gap-3">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ArrowLeftIcon size={24} className="text-neutral-white" />
-          </TouchableOpacity>
-          <Text className="text-neutral-white text-lg font-semibold">
-            Toutes les recettes
-          </Text>
-        </View>
-      </LinearGradient>
+    <View className="flex gap-2 bg-neutral-white h-full">
+      <View className="flex-row items-center gap-3 px-4 py-3">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <ArrowLeftIcon size={24} className="text-primary-light" />
+        </TouchableOpacity>
+        <Text className="text-primary-light text-lg font-semibold">
+          Toutes les recettes
+        </Text>
+      </View>
 
       <Search />
 
@@ -92,8 +84,8 @@ export default function SearchPage() {
               <TouchableOpacity
                 key={option}
                 onPress={() => {
-                  setSelectedSort(option)
-                  setShowSortOptions(false)
+                  setSelectedSort(option);
+                  setShowSortOptions(false);
                 }}
                 className="px-4 py-3 border-b border-neutral-light last:border-b-0"
               >
@@ -123,5 +115,5 @@ export default function SearchPage() {
         ))}
       </ScrollView>
     </View>
-  )
+  );
 }

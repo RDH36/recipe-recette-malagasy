@@ -1,6 +1,6 @@
-import { Ionicons } from "@expo/vector-icons"
-import { Tabs } from "expo-router"
-import { Pressable } from "react-native"
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { Pressable } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -27,7 +27,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Home",
+            title: "Accueil",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
                 name={focused ? "home" : "home-outline"}
@@ -38,10 +38,25 @@ export default function TabsLayout() {
             ),
           }}
         />
+
+        <Tabs.Screen
+          name="search/Search"
+          options={{
+            title: "Rechercher",
+            tabBarIcon: ({ focused, color }) => (
+              <Ionicons
+                name={focused ? "search" : "search-outline"}
+                size={24}
+                color={color}
+                style={{ marginTop: 1 }}
+              />
+            ),
+          }}
+        />
         <Tabs.Screen
           name="bookmarks/bookmarks"
           options={{
-            title: "Favorites",
+            title: "Favoris",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
                 name={focused ? "bookmark" : "bookmark-outline"}
@@ -53,12 +68,12 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
-          name="settings/settings"
+          name="profile/Profile"
           options={{
-            title: "Settings",
+            title: "Profil",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
-                name={focused ? "settings" : "settings-outline"}
+                name={focused ? "person" : "person-outline"}
                 size={24}
                 color={color}
                 style={{ marginTop: 1 }}
@@ -68,5 +83,5 @@ export default function TabsLayout() {
         />
       </Tabs>
     </>
-  )
+  );
 }
