@@ -16,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         <ArrowLeft size={24} className="text-primary-light" />
       </TouchableOpacity>
       <Text className="text-lg font-semibold text-primary-light">
-        Vous êtes en train de cuisiner {title}
+        Préparation de {title}
       </Text>
     </View>
   );

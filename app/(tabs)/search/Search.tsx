@@ -1,33 +1,56 @@
 import { RecipeCard } from "@/components/RecipeCard/RecipeCard";
 import Search from "@/components/Search/Search";
 import { sampleRecipes } from "@/data/sample-data";
+import { useStore } from "@/store/useStore";
 import { router, useNavigation } from "expo-router";
 import { ArrowLeftIcon, ChevronDown } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"];
 const sortOptions = [
-  "Plus récent",
-  "Plus populaire",
+  "Nouveautés",
+  "Populaires",
   "Temps de préparation",
-  "Niveau de difficulté",
+  "Premium",
 ];
 
 export default function SearchPage() {
   const navigation = useNavigation();
   const [selectedFilter, setSelectedFilter] = useState("Tous");
   const [showSortOptions, setShowSortOptions] = useState(false);
-  const [selectedSort, setSelectedSort] = useState("Plus récent");
+  const selectedCategory = useStore((state) => state.selectedCategory);
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
+
+  const [selectedSort, setSelectedSort] = useState("Nouveautés");
+
+  useEffect(() => {
+    if (selectedCategory) {
+      setSelectedSort(selectedCategory);
+    } else {
+      setSelectedSort("Nouveautés");
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    if (selectedSort) {
+      setSelectedCategory(selectedSort);
+    }
+  }, [selectedSort]);
+
+  const backButton = () => {
+    setSelectedCategory("Nouveautés");
+    navigation.goBack();
+  };
 
   return (
     <View className="flex gap-2 bg-neutral-white h-full">
       <View className="flex-row items-center gap-3 px-4 py-3">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={backButton}>
           <ArrowLeftIcon size={24} className="text-primary-light" />
         </TouchableOpacity>
         <Text className="text-primary-light text-lg font-semibold">
-          Toutes les recettes
+          Toutes les recettes - {selectedCategory}
         </Text>
       </View>
 

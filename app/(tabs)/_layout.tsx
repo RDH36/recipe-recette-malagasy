@@ -1,8 +1,11 @@
+import { useStore } from "@/store/useStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { Pressable } from "react-native";
 
 export default function TabsLayout() {
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
+
   return (
     <>
       <Tabs
@@ -59,7 +62,7 @@ export default function TabsLayout() {
             title: "Favoris",
             tabBarIcon: ({ focused, color }) => (
               <Ionicons
-                name={focused ? "bookmark" : "bookmark-outline"}
+                name={focused ? "heart" : "heart-outline"}
                 size={24}
                 color={color}
                 style={{ marginTop: 1 }}
