@@ -1,6 +1,7 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { Bell, LogOut, UserCircle2 } from "lucide-react-native";
-import React, { useState } from "react";
+import { LinearGradient } from "expo-linear-gradient"
+import { router } from "expo-router"
+import { Bell, LogOut, UserCircle2 } from "lucide-react-native"
+import React, { useState } from "react"
 import {
   Image,
   ImageBackground,
@@ -8,20 +9,20 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native";
+} from "react-native"
 
 export default function Profile() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [notifications, setNotifications] = useState(true)
 
   const handleGoogleLogin = () => {
-    setIsLoggedIn(true);
-  };
+    setIsLoggedIn(true)
+  }
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
+    setIsLoggedIn(false)
+  }
 
   if (!isLoggedIn) {
     return (
@@ -63,7 +64,7 @@ export default function Profile() {
           </LinearGradient>
         </ImageBackground>
       </View>
-    );
+    )
   }
 
   return (
@@ -102,7 +103,10 @@ export default function Profile() {
                 Accédez à toutes nos recettes exclusives
               </Text>
             </View>
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-xl">
+            <TouchableOpacity
+              className="bg-primary px-6 py-3 rounded-xl"
+              onPress={() => router.push("/premium/premium")}
+            >
               <Text className="text-white font-semibold">Upgrade</Text>
             </TouchableOpacity>
           </View>
@@ -137,5 +141,5 @@ export default function Profile() {
         </View>
       </View>
     </View>
-  );
+  )
 }

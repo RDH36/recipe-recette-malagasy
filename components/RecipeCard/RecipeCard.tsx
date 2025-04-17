@@ -1,13 +1,15 @@
-import { Recipe } from "@/Types/RecipeType";
-import { Clock, Heart } from "lucide-react-native";
-import React from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Recipe } from "@/Types/RecipeType"
+import { Clock, Heart, Crown, Sparkles } from "lucide-react-native"
+import React from "react"
+import { Image, Text, TouchableOpacity, View } from "react-native"
+import { isNewRecipe } from "@/utils/utilis"
 
 interface RecipeCardProps {
-  recipe: Recipe;
-  isFavorite: boolean;
-  onPress?: () => void;
-  style?: "horizontal" | "vertical";
+  recipe: Recipe
+  isFavorite: boolean
+  onPress?: () => void
+  style?: "horizontal" | "vertical"
+  allRecipes: Recipe[]
 }
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({
@@ -15,7 +17,21 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   onPress,
   isFavorite,
   style = "vertical",
+  allRecipes,
 }) => {
+  const renderBadges = () => (
+    <View className="absolute top-2 left-2 flex-row gap-1">
+      {recipe.isPremium && (
+        <View className="bg-secondary-light rounded-full px-2 py-1 flex-row items-center">
+          <Crown size={14} className="text-neutral-white mr-1" />
+          <Text className="text-neutral-white text-xs font-medium">
+            Premium
+          </Text>
+        </View>
+      )}
+    </View>
+  )
+
   if (style === "horizontal") {
     return (
       <TouchableOpacity onPress={onPress} className="w-[280px] mr-4">
@@ -26,6 +42,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
               className="w-full h-[180px] rounded-t-2xl"
               resizeMode="cover"
             />
+            {renderBadges()}
             <TouchableOpacity className="absolute top-2 right-2 bg-primary-light/20 rounded-full p-1.5">
               <Heart
                 size={20}
@@ -63,17 +80,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-    );
+    )
   }
 
   return (
     <TouchableOpacity onPress={onPress} className="w-full mb-4">
       <View className="flex-row bg-neutral-white rounded-2xl shadow-sm border border-neutral-light overflow-hidden">
-        <Image
-          source={recipe.image}
-          className="w-[120px] h-[120px]"
-          resizeMode="cover"
-        />
+        <View className="relative">
+          <Image
+            source={recipe.image}
+            className="w-[120px] h-[120px]"
+            resizeMode="cover"
+          />
+          {renderBadges()}
+        </View>
 
         <View className="flex-1 p-3">
           <View className="flex-row justify-between items-start">
@@ -111,5 +131,5 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         </View>
       </View>
     </TouchableOpacity>
-  );
-};
+  )
+}

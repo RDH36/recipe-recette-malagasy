@@ -1,23 +1,23 @@
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { useFonts } from "expo-font"
+import { Stack } from "expo-router"
 
-import { useEffect, useState } from "react";
-import "../global.css";
+import { useEffect, useState } from "react"
+import "../global.css"
 
 export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     Pacifico: require("../assets/fonts/Pacifico-Regular.ttf"),
-  });
-  const [isReady, setIsReady] = useState(false);
+  })
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     if (loaded) {
       setTimeout(() => {
-        setIsReady(true);
-      }, 2000);
+        setIsReady(true)
+      }, 2000)
     }
-  }, [loaded]);
+  }, [loaded])
 
   return (
     <Stack>
@@ -31,6 +31,7 @@ export default function RootLayout() {
         name="recipe/[id]/congratulations"
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="premium/premium" options={{ headerShown: false }} />
     </Stack>
-  );
+  )
 }

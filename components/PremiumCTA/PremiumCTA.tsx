@@ -1,6 +1,7 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { BadgeCheck, Crown } from "lucide-react-native";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient"
+import { router } from "expo-router"
+import { BadgeCheck, Crown } from "lucide-react-native"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 export default function PremiumCTA() {
   return (
@@ -37,7 +38,7 @@ export default function PremiumCTA() {
         <TouchableOpacity
           className="bg-neutral-white rounded-full py-3 px-6 flex justify-center items-center"
           onPress={() => {
-            /* TODO: Implement subscription */
+            router.push("/premium/premium")
           }}
         >
           <Text className="text-primary text-center font-semibold">
@@ -46,7 +47,7 @@ export default function PremiumCTA() {
         </TouchableOpacity>
       </LinearGradient>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -57,4 +58,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 1,
   },
-});
+})

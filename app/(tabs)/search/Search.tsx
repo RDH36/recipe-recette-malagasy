@@ -1,47 +1,65 @@
-import { RecipeCard } from "@/components/RecipeCard/RecipeCard";
-import Search from "@/components/Search/Search";
-import { sampleRecipes } from "@/data/sample-data";
-import { useStore } from "@/store/useStore";
-import { router, useNavigation } from "expo-router";
-import { ArrowLeftIcon, ChevronDown } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RecipeCard } from "@/components/RecipeCard/RecipeCard"
+import Search from "@/components/Search/Search"
+import { sampleRecipes } from "@/data/sample-data"
+import { useStore } from "@/store/useStore"
+import { router, useNavigation } from "expo-router"
+import { ArrowLeftIcon, ChevronDown } from "lucide-react-native"
+import React, { useEffect, useState } from "react"
+import { ScrollView, Text, TouchableOpacity, View } from "react-native"
 
-const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"];
+const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"]
 const sortOptions = [
   "Nouveautés",
   "Populaires",
   "Temps de préparation",
   "Premium",
-];
+]
 
 export default function SearchPage() {
-  const navigation = useNavigation();
-  const [selectedFilter, setSelectedFilter] = useState("Tous");
-  const [showSortOptions, setShowSortOptions] = useState(false);
-  const selectedCategory = useStore((state) => state.selectedCategory);
-  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
-
-  const [selectedSort, setSelectedSort] = useState("Nouveautés");
+  const navigation = useNavigation()
+  const [selectedFilter, setSelectedFilter] = useState("Tous")
+  const [showSortOptions, setShowSortOptions] = useState(false)
+  const selectedCategory = useStore((state) => state.selectedCategory)
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory)
+  const [selectedSort, setSelectedSort] = useState(
+    selectedCategory || "Nouveautés"
+  )
 
   useEffect(() => {
     if (selectedCategory) {
-      setSelectedSort(selectedCategory);
-    } else {
-      setSelectedSort("Nouveautés");
+      setSelectedSort(selectedCategory)
     }
-  }, [selectedCategory]);
+  }, [selectedCategory])
 
-  useEffect(() => {
-    if (selectedSort) {
-      setSelectedCategory(selectedSort);
-    }
-  }, [selectedSort]);
+  const handleSortChange = (option: string) => {
+    setSelectedSort(option)
+    setSelectedCategory(option)
+    setShowSortOptions(false)
+  }
 
   const backButton = () => {
-    setSelectedCategory("Nouveautés");
-    navigation.goBack();
-  };
+    setSelectedCategory("Nouveautés")
+    navigation.goBack()
+  }
+
+  const filteredRecipes = React.useMemo(() => {
+    let recipes = [...sampleRecipes]
+
+    if (selectedFilter !== "Tous") {
+      recipes = recipes.filter((recipe) => recipe.difficulty === selectedFilter)
+    }
+
+    switch (selectedSort) {
+      case "Premium":
+        return recipes.filter((recipe) => recipe.isPremium)
+      case "Populaires":
+        return recipes
+      case "Temps de préparation":
+        return recipes.sort((a, b) => a.time - b.time)
+      default:
+        return recipes
+    }
+  }, [selectedSort, selectedFilter])
 
   return (
     <View className="flex gap-2 bg-neutral-white h-full">
@@ -50,7 +68,7 @@ export default function SearchPage() {
           <ArrowLeftIcon size={24} className="text-primary-light" />
         </TouchableOpacity>
         <Text className="text-primary-light text-lg font-semibold">
-          Toutes les recettes - {selectedCategory}
+          Toutes les recettes - {selectedSort}
         </Text>
       </View>
 
@@ -82,7 +100,7 @@ export default function SearchPage() {
         </ScrollView>
       </View>
 
-      <View className="px-4 mb-3 ">
+      <View className="px-4 mb-3">
         <TouchableOpacity
           onPress={() => setShowSortOptions(!showSortOptions)}
           className="flex-row justify-between items-center gap-2 bg-text-secondary/10 px-4 py-2 rounded-lg"
@@ -106,10 +124,7 @@ export default function SearchPage() {
             {sortOptions.map((option) => (
               <TouchableOpacity
                 key={option}
-                onPress={() => {
-                  setSelectedSort(option);
-                  setShowSortOptions(false);
-                }}
+                onPress={() => handleSortChange(option)}
                 className="px-4 py-3 border-b border-neutral-light last:border-b-0"
               >
                 <Text
@@ -128,15 +143,16 @@ export default function SearchPage() {
       </View>
 
       <ScrollView className="px-4">
-        {sampleRecipes.map((recipe) => (
+        {filteredRecipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}
             recipe={recipe}
             isFavorite={false}
             onPress={() => router.push(`/recipe/${recipe.id}`)}
+            allRecipes={filteredRecipes}
           />
         ))}
       </ScrollView>
     </View>
-  );
+  )
 }

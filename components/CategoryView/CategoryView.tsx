@@ -1,22 +1,27 @@
-import { useStore } from "@/store/useStore";
-import { Recipe } from "@/Types/RecipeType";
-import { router } from "expo-router";
-import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { RecipeCard } from "../RecipeCard/RecipeCard";
+import { useStore } from "@/store/useStore"
+import { Recipe } from "@/Types/RecipeType"
+import { router } from "expo-router"
+import React from "react"
+import { ScrollView, Text, TouchableOpacity, View } from "react-native"
+import { RecipeCard } from "../RecipeCard/RecipeCard"
 
 interface CategoryViewProps {
-  recipes: Recipe[];
-  title: string;
+  recipes: Recipe[]
+  title: string
+  allRecipes: Recipe[]
 }
 
-export default function CategoryView({ recipes, title }: CategoryViewProps) {
-  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
+export default function CategoryView({
+  recipes,
+  title,
+  allRecipes,
+}: CategoryViewProps) {
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory)
 
   const handleViewAll = () => {
-    setSelectedCategory(title);
-    router.push("/search/Search");
-  };
+    setSelectedCategory(title)
+    router.push("/search/Search")
+  }
 
   return (
     <View className="mt-6">
@@ -39,9 +44,10 @@ export default function CategoryView({ recipes, title }: CategoryViewProps) {
             isFavorite={false}
             style="horizontal"
             onPress={() => router.push(`/recipe/${recipe.id}`)}
+            allRecipes={allRecipes}
           />
         ))}
       </ScrollView>
     </View>
-  );
+  )
 }

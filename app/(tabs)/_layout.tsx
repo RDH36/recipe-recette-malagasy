@@ -1,10 +1,10 @@
-import { useStore } from "@/store/useStore";
-import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-import { Pressable } from "react-native";
+import { useStore } from "@/store/useStore"
+import { Ionicons } from "@expo/vector-icons"
+import { Tabs } from "expo-router"
+import { Pressable } from "react-native"
 
 export default function TabsLayout() {
-  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory)
 
   return (
     <>
@@ -22,7 +22,10 @@ export default function TabsLayout() {
             <Pressable
               {...props}
               android_ripple={{ color: "transparent" }}
-              style={({ pressed }) => [props.style, pressed && { opacity: 1 }]}
+              style={({ pressed }) => [
+                props.style,
+                pressed && { opacity: 0.5 },
+              ]}
             />
           ),
         }}
@@ -86,5 +89,5 @@ export default function TabsLayout() {
         />
       </Tabs>
     </>
-  );
+  )
 }
