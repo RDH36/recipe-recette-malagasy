@@ -3,21 +3,52 @@ import Banner from "@/components/Banner/Banner"
 import CategoryView from "@/components/CategoryView/CategoryView"
 import Header from "@/components/Header/Header"
 import PremiumCTA from "@/components/PremiumCTA/PremiumCTA"
-import { sampleRecipes } from "@/data/sample-data"
-import { useState, useCallback } from "react"
-import { ScrollView, View, RefreshControl } from "react-native"
+import { getRecipes } from "@/services/recipeService"
+import { useState, useCallback, useEffect } from "react"
+import {
+  ScrollView,
+  View,
+  RefreshControl,
+  Text,
+  ActivityIndicator,
+} from "react-native"
 
 export default function Index() {
-  const [recipes, setRecipes] = useState<Recipe[]>(sampleRecipes)
+  const [recipes, setRecipes] = useState<Recipe[]>([])
   const [refreshing, setRefreshing] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const onRefresh = useCallback(() => {
-    setRefreshing(true)
-    setTimeout(() => {
-      setRecipes(sampleRecipes)
-      setRefreshing(false)
-    }, 1000)
+  const fetchRecipes = async () => {
+    try {
+      const data = await getRecipes()
+      setRecipes(data)
+    } catch (error) {
+      console.error("Error fetching recipes:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRecipes()
   }, [])
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await fetchRecipes()
+    setRefreshing(false)
+  }, [])
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-neutral-white items-center justify-center">
+        <ActivityIndicator size="large" color="#FF8050" />
+        <Text className="mt-4 text-text-primary">
+          Chargement des recettes...
+        </Text>
+      </View>
+    )
+  }
 
   return (
     <View className="flex-1 bg-neutral-white">

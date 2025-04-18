@@ -11,11 +11,13 @@ export interface Recipe {
   description: string
   image: ImageSourcePropType
   time: number
+  cookingTime: number
   difficulty: "Easy" | "Medium" | "Hard"
   category: string
   ingredients: string[]
   instructions: string[]
   isPremium?: boolean
+  rating: number
   createdAt: string
   // Informations premium
   region?: string

@@ -8,38 +8,103 @@ import {
   UtensilsCrossed,
 } from "lucide-react-native"
 import React, { useEffect, useRef, useState } from "react"
-import { Dimensions, TouchableOpacity, View } from "react-native"
+import {
+  Dimensions,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native"
 import ConfettiCannon from "react-native-confetti-cannon"
 import ViewShot from "react-native-view-shot"
 import { Recipe } from "@/Types/RecipeType"
-import { sampleRecipes } from "@/data/sample-data"
+import { getRecipeById } from "@/services/recipeService"
 import { Text } from "expo-dynamic-fonts"
 import { LinearGradient } from "expo-linear-gradient"
 
 const Congratulations = () => {
   const router = useRouter()
   const { id } = useLocalSearchParams()
-  const [recipe, setRecipe] = useState<Recipe>()
+  const [recipe, setRecipe] = useState<Recipe | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const confettiRef = useRef<any>(null)
   const viewShotRef = useRef<ViewShot>(null)
   const { width } = Dimensions.get("window")
 
   useEffect(() => {
-    const recipe = sampleRecipes.find((recipe) => recipe.id === id)
-    if (recipe) {
-      setRecipe(recipe)
+    const fetchRecipe = async () => {
+      try {
+        if (typeof id === "string") {
+          const data = await getRecipeById(id)
+          setRecipe(data)
+        }
+      } catch (err) {
+        setError("Une erreur est survenue lors du chargement de la recette")
+        console.error("Error fetching recipe:", err)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchRecipe()
   }, [id])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (confettiRef.current) {
+      if (confettiRef.current && !loading && recipe) {
         confettiRef.current.start()
       }
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [])
+  }, [loading, recipe])
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <ActivityIndicator size="large" color="#FF8050" />
+        <Text className="mt-4 text-text-primary">
+          Chargement de la recette...
+        </Text>
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center p-4">
+        <Text className="text-text-primary text-center">{error}</Text>
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)")}
+          className="mt-4 flex-row gap-2 justify-center bg-primary py-4 rounded-xl items-center"
+        >
+          <Home size={16} className="text-neutral-white" />
+          <Text className="text-neutral-white text-base font-semibold">
+            Retour à l'accueil
+          </Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
+  if (!recipe) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center p-4">
+        <Text className="text-text-primary text-center">
+          Recette non trouvée
+        </Text>
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)")}
+          className="mt-4 flex-row gap-2 justify-center bg-primary py-4 rounded-xl items-center"
+        >
+          <Home size={16} className="text-neutral-white" />
+          <Text className="text-neutral-white text-base font-semibold">
+            Retour à l'accueil
+          </Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
 
   const ShareContent = () => (
     <LinearGradient
@@ -60,7 +125,7 @@ const Congratulations = () => {
           Vous avez réussi à préparer
         </Text>
         <Text className="text-xl font-bold mb-4 text-neutral-white">
-          {recipe?.title}
+          {recipe.title}
         </Text>
 
         <View className="flex-row gap-2 mb-6">
@@ -119,7 +184,7 @@ const Congratulations = () => {
             Vous avez réussi à préparer
           </Text>
           <Text className="text-xl font-bold mb-2 text-primary">
-            {recipe?.title}
+            {recipe.title}
           </Text>
 
           <View className="flex-row gap-2">
@@ -165,7 +230,7 @@ const Congratulations = () => {
           onPress={() =>
             handleShare(viewShotRef, {
               title: "Félicitations !",
-              description: `J'ai réussi à préparer ${recipe?.title} avec Tsikonina - La cuisine malgache authentique !`,
+              description: `J'ai réussi à préparer ${recipe.title} avec Tsikonina - La cuisine malgache authentique !`,
             } as any)
           }
           className="flex-row gap-2 justify-center bg-primary py-4 rounded-xl items-center"

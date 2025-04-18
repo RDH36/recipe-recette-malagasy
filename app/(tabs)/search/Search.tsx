@@ -1,6 +1,5 @@
 import { RecipeCard } from "@/components/RecipeCard/RecipeCard"
 import Search from "@/components/Search/Search"
-import { sampleRecipes } from "@/data/sample-data"
 import { useStore } from "@/store/useStore"
 import { router, useNavigation } from "expo-router"
 import { ArrowLeftIcon, ChevronDown } from "lucide-react-native"
@@ -11,7 +10,13 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
+  FlatList,
+  ActivityIndicator,
 } from "react-native"
+import { Recipe } from "@/Types/RecipeType"
+import { getRecipes } from "@/services/recipeService"
+import { DifficultyFilters } from "@/components/Search/DifficultyFilters"
+import { SortOptions } from "@/components/Search/SortOptions"
 
 const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"]
 const sortOptions = [
@@ -21,7 +26,7 @@ const sortOptions = [
   "Premium",
 ]
 
-export default function SearchPage() {
+export default function SearchScreen() {
   const navigation = useNavigation()
   const [selectedFilter, setSelectedFilter] = useState("Tous")
   const [showSortOptions, setShowSortOptions] = useState(false)
@@ -31,6 +36,10 @@ export default function SearchPage() {
     selectedCategory || "Découvertes"
   )
   const [refreshing, setRefreshing] = useState(false)
+  const [recipes, setRecipes] = useState<Recipe[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
     if (selectedCategory) {
@@ -38,11 +47,26 @@ export default function SearchPage() {
     }
   }, [selectedCategory])
 
-  const onRefresh = useCallback(() => {
+  const fetchRecipes = async () => {
+    try {
+      const data = await getRecipes()
+      setRecipes(data)
+    } catch (err) {
+      setError("Une erreur est survenue lors du chargement des recettes")
+      console.error("Error fetching recipes:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchRecipes()
+  }, [])
+
+  const onRefresh = useCallback(async () => {
     setRefreshing(true)
-    setTimeout(() => {
-      setRefreshing(false)
-    }, 1000)
+    await fetchRecipes()
+    setRefreshing(false)
   }, [])
 
   const handleSortChange = (option: string) => {
@@ -57,23 +81,46 @@ export default function SearchPage() {
   }
 
   const filteredRecipes = React.useMemo(() => {
-    let recipes = [...sampleRecipes]
+    let filtered = [...recipes]
+
+    if (searchQuery) {
+      filtered = filtered.filter((recipe) =>
+        recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
 
     if (selectedFilter !== "Tous") {
-      recipes = recipes.filter((recipe) => recipe.difficulty === selectedFilter)
+      filtered = filtered.filter(
+        (recipe) => recipe.difficulty === selectedFilter
+      )
     }
 
     switch (selectedSort) {
       case "Premium":
-        return recipes.filter((recipe) => recipe.isPremium)
+        return filtered.filter((recipe) => recipe.isPremium)
       case "Populaires":
-        return recipes
+        return filtered
       case "Temps de préparation":
-        return recipes.sort((a, b) => a.time - b.time)
+        return filtered.sort((a, b) => a.time - b.time)
       default:
-        return recipes
+        return filtered
     }
-  }, [selectedSort, selectedFilter])
+  }, [selectedSort, selectedFilter, recipes, searchQuery])
+
+  const sortedRecipes = React.useMemo(() => {
+    return [...filteredRecipes].sort((a, b) => {
+      switch (selectedSort) {
+        case "Populaires":
+          return b.rating - a.rating
+        case "Temps de préparation":
+          return a.cookingTime - b.cookingTime
+        case "Premium":
+          return b.isPremium ? 1 : -1
+        default:
+          return 0
+      }
+    })
+  }, [selectedSort, filteredRecipes])
 
   return (
     <View className="flex gap-2 bg-neutral-white h-full">
@@ -86,98 +133,66 @@ export default function SearchPage() {
         </Text>
       </View>
 
-      <Search />
+      <Search value={searchQuery} onSearch={setSearchQuery} />
 
-      <View className="px-4 py-3">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row gap-2">
-            {difficultyFilters.map((filter) => (
-              <TouchableOpacity
-                key={filter}
-                onPress={() => setSelectedFilter(filter)}
-                className={`px-4 py-2 rounded-lg ${
-                  selectedFilter === filter ? "bg-primary" : "bg-neutral-light"
-                }`}
-              >
-                <Text
-                  className={`${
-                    selectedFilter === filter
-                      ? "text-neutral-white"
-                      : "text-text-secondary"
-                  }`}
-                >
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
-      </View>
+      <DifficultyFilters
+        selectedFilter={selectedFilter}
+        onFilterChange={(filter) => setSelectedFilter(filter)}
+      />
 
-      <View className="px-4 mb-3">
-        <TouchableOpacity
-          onPress={() => setShowSortOptions(!showSortOptions)}
-          className="flex-row justify-between items-center gap-2 bg-text-secondary/10 px-4 py-2 rounded-lg"
-        >
-          <Text className="text-text-primary font-medium">
-            Trier par:{" "}
-            <Text className="text-primary-dark font-normal">
-              {selectedSort}
-            </Text>
+      <SortOptions
+        selectedSort={selectedSort}
+        showSortOptions={showSortOptions}
+        onSortChange={handleSortChange}
+        onToggleSortOptions={() => setShowSortOptions(!showSortOptions)}
+      />
+
+      {loading ? (
+        <View className="flex-1 bg-neutral-white items-center justify-center">
+          <ActivityIndicator size="large" color="#FF8050" />
+          <Text className="mt-4 text-text-primary">
+            Chargement des recettes...
           </Text>
-          <ChevronDown
-            size={20}
-            className={`text-text-primary transition-transform ${
-              showSortOptions ? "rotate-180" : "rotate-0"
-            }`}
-          />
-        </TouchableOpacity>
-
-        {showSortOptions && (
-          <View className="mt-2 bg-neutral-white rounded-lg shadow-sm border border-neutral-light">
-            {sortOptions.map((option) => (
-              <TouchableOpacity
-                key={option}
-                onPress={() => handleSortChange(option)}
-                className="px-4 py-3 border-b border-neutral-light last:border-b-0"
-              >
-                <Text
-                  className={`${
-                    selectedSort === option
-                      ? "text-primary font-medium"
-                      : "text-text-secondary"
-                  }`}
-                >
-                  {option}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-      </View>
-
-      <ScrollView
-        className="px-4"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#FF8050"
-            colors={["#FF8050"]}
-            progressBackgroundColor="#FFFFFF"
-          />
-        }
-      >
-        {filteredRecipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            isFavorite={false}
-            onPress={() => router.push(`/recipe/${recipe.id}`)}
-            allRecipes={filteredRecipes}
-          />
-        ))}
-      </ScrollView>
+        </View>
+      ) : error ? (
+        <View className="flex-1 items-center justify-center p-4">
+          <Text className="text-text-primary text-center">{error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={sortedRecipes}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#FF8050"
+              colors={["#FF8050"]}
+              progressBackgroundColor="#FFFFFF"
+            />
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => router.push(`/recipe/${item.id}`)}
+              className="p-4"
+            >
+              <RecipeCard
+                recipe={item}
+                isFavorite={false}
+                allRecipes={recipes}
+                onPress={() => router.push(`/recipe/${item.id}`)}
+              />
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center p-4">
+              <Text className="text-text-primary text-center">
+                Aucune recette trouvée
+              </Text>
+            </View>
+          }
+        />
+      )}
     </View>
   )
 }
