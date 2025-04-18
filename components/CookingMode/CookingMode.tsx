@@ -1,109 +1,109 @@
-import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
-import Header from "./Header/Header";
-import Navigation from "./Navigation/Navigation";
-import ProgressBar from "./ProgressBar/ProgressBar";
-import StepContent from "./StepContent/StepContent";
-import Timer from "./Timer/Timer";
+import { useRouter } from "expo-router"
+import React, { useEffect, useRef, useState } from "react"
+import { View } from "react-native"
+import Header from "./Header/Header"
+import Navigation from "./Navigation/Navigation"
+import ProgressBar from "./ProgressBar/ProgressBar"
+import StepContent from "./StepContent/StepContent"
+import Timer from "./Timer/Timer"
+import { Recipe } from "@/Types/RecipeType"
 
 interface CookingModeProps {
-  steps: string[];
-  recipeId: string;
+  recipes: Recipe
 }
 
-const CookingMode: React.FC<CookingModeProps> = ({ steps, recipeId }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+const CookingMode: React.FC<CookingModeProps> = ({ recipes }) => {
+  const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState<boolean[]>(
-    new Array(steps.length).fill(false)
-  );
-  const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
-  const [showTimer, setShowTimer] = useState(false);
-  const timerInterval = useRef<NodeJS.Timeout | null>(null);
-  const router = useRouter();
+    new Array(recipes?.instructions.length).fill(false)
+  )
+  const [timerSeconds, setTimerSeconds] = useState<number | null>(null)
+  const [showTimer, setShowTimer] = useState(false)
+  const timerInterval = useRef<NodeJS.Timeout | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     return () => {
       if (timerInterval.current) {
-        clearInterval(timerInterval.current);
+        clearInterval(timerInterval.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const startTimer = (minutes: number) => {
     if (timerInterval.current) {
-      clearInterval(timerInterval.current);
+      clearInterval(timerInterval.current)
     }
-    setTimerSeconds(minutes * 60);
-    setShowTimer(true);
+    setTimerSeconds(minutes * 60)
+    setShowTimer(true)
 
     timerInterval.current = setInterval(() => {
       setTimerSeconds((prev) => {
         if (prev === null || prev <= 0) {
           if (timerInterval.current) {
-            clearInterval(timerInterval.current);
+            clearInterval(timerInterval.current)
           }
-          setShowTimer(false);
-          return null;
+          setShowTimer(false)
+          return null
         }
-        return prev - 1;
-      });
-    }, 1000);
-  };
+        return prev - 1
+      })
+    }, 1000)
+  }
 
   const cancelTimer = () => {
     if (timerInterval.current) {
-      clearInterval(timerInterval.current);
+      clearInterval(timerInterval.current)
     }
-    setTimerSeconds(null);
-    setShowTimer(false);
-  };
+    setTimerSeconds(null)
+    setShowTimer(false)
+  }
 
   const handleNext = () => {
     if (!completedSteps[currentStep]) {
-      return;
+      return
     }
 
-    if (currentStep === steps.length - 1) {
-      router.push(`/recipe/${recipeId}/congratulations`);
+    if (currentStep === recipes?.instructions.length - 1) {
+      router.push(`/recipe/${recipes?.id}/congratulations`)
     } else {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   const handlePrevious = () => {
     if (currentStep === 0) {
-      router.back();
+      router.back()
     } else {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   const toggleStepCompletion = () => {
-    const newCompletedSteps = [...completedSteps];
-    const newValue = !newCompletedSteps[currentStep];
-    newCompletedSteps[currentStep] = newValue;
-    setCompletedSteps(newCompletedSteps);
+    const newCompletedSteps = [...completedSteps]
+    const newValue = !newCompletedSteps[currentStep]
+    newCompletedSteps[currentStep] = newValue
+    setCompletedSteps(newCompletedSteps)
 
     if (newValue && showTimer) {
-      cancelTimer();
+      cancelTimer()
     }
-  };
+  }
 
   return (
     <View className="flex-1 bg-neutral-white">
       <View className="p-4">
-        <Header title="Romazava" />
+        <Header title={recipes?.title} />
         <ProgressBar
           completedSteps={completedSteps}
-          totalSteps={steps.length}
+          totalSteps={recipes?.instructions.length}
         />
       </View>
 
       <StepContent
         currentStep={currentStep}
-        totalSteps={steps.length}
-        stepText={steps[currentStep]}
+        totalSteps={recipes?.instructions.length}
+        stepText={recipes?.instructions[currentStep]}
         isCompleted={completedSteps[currentStep]}
         isTimerActive={showTimer}
         onToggleComplete={toggleStepCompletion}
@@ -113,7 +113,7 @@ const CookingMode: React.FC<CookingModeProps> = ({ steps, recipeId }) => {
       <Navigation
         onPrevious={handlePrevious}
         onNext={handleNext}
-        isLastStep={currentStep === steps.length - 1}
+        isLastStep={currentStep === recipes?.instructions.length - 1}
         canGoNext={completedSteps[currentStep]}
       />
 
@@ -121,7 +121,7 @@ const CookingMode: React.FC<CookingModeProps> = ({ steps, recipeId }) => {
         <Timer seconds={timerSeconds} onCancel={cancelTimer} />
       )}
     </View>
-  );
-};
+  )
+}
 
-export default CookingMode;
+export default CookingMode

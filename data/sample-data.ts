@@ -55,7 +55,7 @@ export const sampleRecipes: Recipe[] = [
     time: 90,
     difficulty: "Medium",
     category: "malagasy",
-    isPremium: true,
+    isPremium: false,
     createdAt: "2024-01-16T14:30:00Z",
     region: "Côte Est",
     history:

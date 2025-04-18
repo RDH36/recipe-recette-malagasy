@@ -4,11 +4,21 @@ import CategoryView from "@/components/CategoryView/CategoryView"
 import Header from "@/components/Header/Header"
 import PremiumCTA from "@/components/PremiumCTA/PremiumCTA"
 import { sampleRecipes } from "@/data/sample-data"
-import { useState } from "react"
-import { ScrollView, View } from "react-native"
+import { useState, useCallback } from "react"
+import { ScrollView, View, RefreshControl } from "react-native"
 
 export default function Index() {
   const [recipes, setRecipes] = useState<Recipe[]>(sampleRecipes)
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    setTimeout(() => {
+      setRecipes(sampleRecipes)
+      setRefreshing(false)
+    }, 1000)
+  }, [])
+
   return (
     <View className="flex-1 bg-neutral-white">
       <View className="flex-1">
@@ -16,7 +26,19 @@ export default function Index() {
           <Header />
         </View>
 
-        <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#FF8050"
+              colors={["#FF8050"]}
+              progressBackgroundColor="#FFFFFF"
+            />
+          }
+        >
           <Banner />
           <CategoryView
             recipes={recipes}
@@ -25,27 +47,13 @@ export default function Index() {
           />
           <CategoryView
             recipes={recipes}
-            title="Nouveautés"
+            title="Découvertes"
             allRecipes={recipes}
           />
 
           <View className="mt-6 px-4 mb-4">
             <PremiumCTA />
           </View>
-
-          {/* <View className="mt-6 px-4">
-            <Text className="text-text-primary text-xl font-semibold mb-4">
-              Toutes les Recettes
-            </Text>
-            {recipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                isFavorite={false}
-                onPress={() => router.push(`/recipe/${recipe.id}`)}
-              />
-            ))}
-          </View> */}
         </ScrollView>
       </View>
     </View>

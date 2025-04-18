@@ -13,7 +13,7 @@ const PremiumScreen = () => {
     } else {
       setIsPremium(true)
       console.log(`Subscribing to ${plan} plan`)
-      router.back()
+      router.push("/premium/congratulation")
     }
   }
 

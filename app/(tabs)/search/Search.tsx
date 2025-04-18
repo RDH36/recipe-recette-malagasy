@@ -4,12 +4,18 @@ import { sampleRecipes } from "@/data/sample-data"
 import { useStore } from "@/store/useStore"
 import { router, useNavigation } from "expo-router"
 import { ArrowLeftIcon, ChevronDown } from "lucide-react-native"
-import React, { useEffect, useState } from "react"
-import { ScrollView, Text, TouchableOpacity, View } from "react-native"
+import React, { useEffect, useState, useCallback } from "react"
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  RefreshControl,
+} from "react-native"
 
 const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"]
 const sortOptions = [
-  "Nouveautés",
+  "Découvertes",
   "Populaires",
   "Temps de préparation",
   "Premium",
@@ -22,14 +28,22 @@ export default function SearchPage() {
   const selectedCategory = useStore((state) => state.selectedCategory)
   const setSelectedCategory = useStore((state) => state.setSelectedCategory)
   const [selectedSort, setSelectedSort] = useState(
-    selectedCategory || "Nouveautés"
+    selectedCategory || "Découvertes"
   )
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     if (selectedCategory) {
       setSelectedSort(selectedCategory)
     }
   }, [selectedCategory])
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    setTimeout(() => {
+      setRefreshing(false)
+    }, 1000)
+  }, [])
 
   const handleSortChange = (option: string) => {
     setSelectedSort(option)
@@ -38,7 +52,7 @@ export default function SearchPage() {
   }
 
   const backButton = () => {
-    setSelectedCategory("Nouveautés")
+    setSelectedCategory("Découvertes")
     navigation.goBack()
   }
 
@@ -142,7 +156,18 @@ export default function SearchPage() {
         )}
       </View>
 
-      <ScrollView className="px-4">
+      <ScrollView
+        className="px-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#FF8050"
+            colors={["#FF8050"]}
+            progressBackgroundColor="#FFFFFF"
+          />
+        }
+      >
         {filteredRecipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}

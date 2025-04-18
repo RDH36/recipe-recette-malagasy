@@ -17,20 +17,23 @@
       "barStyle": "dark-content"
     },
     "splash": {
-      "image": "./assets/images/splash.png",
       "resizeMode": "cover",
       "backgroundColor": "#FF8050"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accéder à votre galerie pour sauvegarder les images de recettes."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
-    "plugins": ["expo-router"],
+    "plugins": ["expo-router", "expo-media-library"],
     "experiments": {
       "typedRoutes": true
     }

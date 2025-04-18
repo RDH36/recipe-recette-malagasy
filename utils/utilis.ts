@@ -1,6 +1,8 @@
 import ViewShot, { captureRef } from "react-native-view-shot"
 import * as Sharing from "expo-sharing"
+import * as MediaLibrary from "expo-media-library"
 import { Recipe } from "@/Types/RecipeType"
+import { Alert } from "react-native"
 
 export const handleShare = async (
   viewShotRef: React.RefObject<ViewShot>,
@@ -21,6 +23,9 @@ export const handleShare = async (
     })
   } catch (error) {
     console.error("Erreur lors du partage:", error)
+    Alert.alert("Erreur", "Une erreur est survenue lors du partage", [
+      { text: "OK" },
+    ])
   }
 }
 
