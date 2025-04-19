@@ -1,28 +1,28 @@
-import { LinearGradient } from "expo-linear-gradient"
-import { router } from "expo-router"
-import { Bell, LogOut, UserCircle2 } from "lucide-react-native"
-import React, { useState } from "react"
+import Auth from "@/components/auth/Auth";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { Bell, LogOut, UserCircle2 } from "lucide-react-native";
+import { useState } from "react";
 import {
-  Image,
   ImageBackground,
   Switch,
   Text,
   TouchableOpacity,
   View,
-} from "react-native"
+} from "react-native";
 
 export default function Profile() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [notifications, setNotifications] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [notifications, setNotifications] = useState(true);
 
   const handleGoogleLogin = () => {
-    setIsLoggedIn(true)
-  }
+    setIsLoggedIn(true);
+  };
 
   const handleLogout = () => {
-    setIsLoggedIn(false)
-  }
+    setIsLoggedIn(false);
+  };
 
   if (!isLoggedIn) {
     return (
@@ -45,7 +45,10 @@ export default function Profile() {
               </Text>
             </View>
 
-            <TouchableOpacity
+            <View className="flex-row items-center justify-center">
+              <Auth />
+            </View>
+            {/* <TouchableOpacity
               onPress={handleGoogleLogin}
               className="bg-neutral-white py-4 rounded-2xl flex-row items-center justify-center shadow-lg"
             >
@@ -56,7 +59,7 @@ export default function Profile() {
               <Text className="text-text-primary font-semibold text-base">
                 Continuer avec Google
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <Text className="text-neutral-white/60 text-center mt-6 text-sm">
               En continuant, vous acceptez nos conditions d'utilisation
@@ -64,7 +67,7 @@ export default function Profile() {
           </LinearGradient>
         </ImageBackground>
       </View>
-    )
+    );
   }
 
   return (
@@ -141,5 +144,5 @@ export default function Profile() {
         </View>
       </View>
     </View>
-  )
+  );
 }

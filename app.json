@@ -12,18 +12,26 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accéder à votre galerie pour sauvegarder les images de recettes."
-      }
+      },
+      "bundleIdentifier": "com.rdh36.reciperecettemalagasy"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "package": "com.rdh36.reciperecettemalagasy"
     },
     "plugins": [
       "expo-router",
       "expo-media-library",
+      "@react-native-google-signin/google-signin",
       [
         "expo-splash-screen",
         {
