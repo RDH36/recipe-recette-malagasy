@@ -1,9 +1,12 @@
 import Auth from "@/components/auth/Auth";
+import { supabase } from "@/config/supabase";
+import { Session } from "@supabase/supabase-js";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Bell, LogOut, UserCircle2 } from "lucide-react-native";
-import { useState } from "react";
+import { Bell, LogOut } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import {
+  Image,
   ImageBackground,
   Switch,
   Text,
@@ -12,19 +15,20 @@ import {
 } from "react-native";
 
 export default function Profile() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
 
-  const handleGoogleLogin = () => {
-    setIsLoggedIn(true);
-  };
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-  };
-
-  if (!isLoggedIn) {
+  if (!session) {
     return (
       <View className="flex-1 bg-neutral-white">
         <ImageBackground
@@ -88,12 +92,15 @@ export default function Profile() {
         <View className="bg-white rounded-3xl p-6 shadow-lg">
           <View className="items-center -mt-14">
             <View className="w-24 h-24 rounded-full bg-primary/10 items-center justify-center border-4 border-white shadow-xl">
-              <UserCircle2 size={60} className="text-primary" />
+              <Image
+                source={{ uri: session?.user?.user_metadata?.avatar_url }}
+                className="w-24 h-24 rounded-full"
+              />
             </View>
             <Text className="text-xl font-bold text-text-primary mt-3">
-              John Doe
+              {session?.user?.user_metadata?.full_name}
             </Text>
-            <Text className="text-text-secondary">john.doe@example.com</Text>
+            <Text className="text-text-secondary"> {session?.user?.email}</Text>
           </View>
         </View>
         <View className="mt-6 bg-primary/5 rounded-3xl p-6">
@@ -135,7 +142,7 @@ export default function Profile() {
           </View>
 
           <TouchableOpacity
-            onPress={handleLogout}
+            onPress={() => supabase.auth.signOut()}
             className="flex-row items-center justify-center bg-white border border-red-500 p-2 rounded-2xl shadow-sm"
           >
             <LogOut size={20} className="text-red-500 mr-2" />

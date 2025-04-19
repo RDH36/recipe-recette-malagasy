@@ -1,3 +1,4 @@
+import { supabase } from "@/config/supabase";
 import {
   GoogleSignin,
   GoogleSigninButton,
@@ -12,18 +13,24 @@ export default function Auth() {
   });
 
   const signIn = async () => {
-    console.log("signIn");
     try {
       await GoogleSignin.hasPlayServices();
-      console.log("signIn hasPlayServices");
       const response = await GoogleSignin.signIn();
-      console.log("signIn response", JSON.stringify(response, null, 2));
       if (isSuccessResponse(response)) {
-        console.log("signIn success", JSON.stringify(response.data, null, 2));
+        if (response.data.idToken) {
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: "google",
+            token: response.data.idToken,
+          });
+          if (error) {
+            console.log("error", error);
+          }
+          if (data) {
+            console.log("data", data);
+          }
+        }
       } else {
-        console.log("sign in was cancelled by user");
       }
-      console.log("signIn end");
     } catch (error) {
       if (isErrorWithCode(error)) {
         switch (error.code) {

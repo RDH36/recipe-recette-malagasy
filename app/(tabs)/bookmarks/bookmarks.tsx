@@ -1,13 +1,24 @@
+import { supabase } from "@/config/supabase";
 import { Ionicons } from "@expo/vector-icons";
+import { Session } from "@supabase/supabase-js";
 import { router } from "expo-router";
 import { HeartIcon } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function BookmarksScreen() {
-  // Simuler un état non connecté
-  const isLoggedIn = false;
+  const [session, setSession] = useState<Session | null>(null);
 
-  if (!isLoggedIn) {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
+
+  if (!session) {
     return (
       <View className="flex-1 bg-neutral-white px-4">
         <View className="flex-1 items-center justify-center">
