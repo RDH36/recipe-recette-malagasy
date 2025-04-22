@@ -1,5 +1,6 @@
 import Auth from "@/components/auth/Auth";
 import { supabase } from "@/config/supabase";
+import { useStore } from "@/store/useStore";
 import { Session } from "@supabase/supabase-js";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -18,6 +19,9 @@ export default function Profile() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
+
+  // Récupérer les états globaux
+  const { user, isPremium } = useStore();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -48,23 +52,7 @@ export default function Profile() {
                 Connectez-vous pour sauvegarder vos recettes préférées
               </Text>
             </View>
-
-            <View className="flex-row items-center justify-center">
-              <Auth />
-            </View>
-            {/* <TouchableOpacity
-              onPress={handleGoogleLogin}
-              className="bg-neutral-white py-4 rounded-2xl flex-row items-center justify-center shadow-lg"
-            >
-              <Image
-                source={require("@/assets/icons/google.png")}
-                className="w-5 h-5 mr-3"
-              />
-              <Text className="text-text-primary font-semibold text-base">
-                Continuer avec Google
-              </Text>
-            </TouchableOpacity> */}
-
+            <Auth />
             <Text className="text-neutral-white/60 text-center mt-6 text-sm">
               En continuant, vous acceptez nos conditions d'utilisation
             </Text>
@@ -101,26 +89,36 @@ export default function Profile() {
               {session?.user?.user_metadata?.full_name}
             </Text>
             <Text className="text-text-secondary"> {session?.user?.email}</Text>
+
+            {isPremium && (
+              <View className="bg-primary/10 px-3 py-1 rounded-full mt-2">
+                <Text className="text-primary font-medium">Premium</Text>
+              </View>
+            )}
           </View>
         </View>
-        <View className="mt-6 bg-primary/5 rounded-3xl p-6">
-          <View className="flex-row justify-between items-center">
-            <View className="flex-1">
-              <Text className="text-lg font-bold text-text-primary">
-                Passez à Premium
-              </Text>
-              <Text className="text-text-secondary text-sm mt-1">
-                Accédez à toutes nos recettes exclusives
-              </Text>
+
+        {!isPremium && (
+          <View className="mt-6 bg-primary/5 rounded-3xl p-6">
+            <View className="flex-row justify-between items-center">
+              <View className="flex-1">
+                <Text className="text-lg font-bold text-text-primary">
+                  Passez à Premium
+                </Text>
+                <Text className="text-text-secondary text-sm mt-1">
+                  Accédez à toutes nos recettes exclusives
+                </Text>
+              </View>
+              <TouchableOpacity
+                className="bg-primary px-6 py-3 rounded-xl"
+                onPress={() => router.push("/premium/premium")}
+              >
+                <Text className="text-white font-semibold">Upgrade</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              className="bg-primary px-6 py-3 rounded-xl"
-              onPress={() => router.push("/premium/premium")}
-            >
-              <Text className="text-white font-semibold">Upgrade</Text>
-            </TouchableOpacity>
           </View>
-        </View>
+        )}
+
         <View className=" flex gap-4 mt-6 space-y-4">
           <View className="bg-white rounded-2xl shadow-sm">
             <TouchableOpacity className="flex-row items-center justify-between p-4 border-t border-neutral-100">

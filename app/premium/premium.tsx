@@ -1,21 +1,49 @@
-import { View, Text, ScrollView } from "react-native"
-import React from "react"
-import PricingCard from "@/components/PremiumCTA/PricingCard"
-import { useStore } from "@/store/useStore"
-import { router } from "expo-router"
-const PremiumScreen = () => {
-  const setIsPremium = useStore((state) => state.setIsPremium)
-  const isPremium = useStore((state) => state.isPremium)
+import PricingCard from "@/components/PremiumCTA/PricingCard";
+import { updatePremiumStatus } from "@/services/userServices";
+import { useStore } from "@/store/useStore";
+import { router } from "expo-router";
+import { Alert, ScrollView, Text, View } from "react-native";
 
-  const handleSubscribe = (plan: "free" | "premium") => {
+const PremiumScreen = () => {
+  const { setIsPremium, isPremium, user } = useStore();
+
+  const handleSubscribe = async (plan: "free" | "premium") => {
     if (isPremium) {
-      router.push("/search/Search")
-    } else {
-      setIsPremium(true)
-      console.log(`Subscribing to ${plan} plan`)
-      router.push("/premium/congratulation")
+      router.push("/search/Search");
+      return;
     }
-  }
+
+    if (!user) {
+      Alert.alert(
+        "Connexion requise",
+        "Vous devez être connecté pour vous abonner à Premium.",
+        [{ text: "OK", onPress: () => router.push("/(tabs)") }]
+      );
+      return;
+    }
+
+    try {
+      const success = await updatePremiumStatus(user.id, true);
+
+      if (success) {
+        setIsPremium(true);
+        console.log(`Abonnement réussi au forfait ${plan}`);
+
+        router.push("/premium/congratulation");
+      } else {
+        Alert.alert(
+          "Erreur",
+          "Une erreur s'est produite lors de l'activation de votre abonnement. Veuillez réessayer."
+        );
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'abonnement:", error);
+      Alert.alert(
+        "Erreur",
+        "Une erreur s'est produite. Veuillez réessayer ultérieurement."
+      );
+    }
+  };
 
   return (
     <ScrollView className="flex-1 bg-neutral-white">
@@ -48,7 +76,7 @@ const PremiumScreen = () => {
         </View>
       </View>
     </ScrollView>
-  )
-}
+  );
+};
 
-export default PremiumScreen
+export default PremiumScreen;

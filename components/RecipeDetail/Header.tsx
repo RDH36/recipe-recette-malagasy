@@ -1,24 +1,25 @@
-import { Recipe } from "@/Types/RecipeType"
-import { useNavigation } from "@react-navigation/native"
-import { LinearGradient } from "expo-linear-gradient"
-import { ArrowLeftIcon, HeartIcon, Share2 } from "lucide-react-native"
-import React from "react"
+import { Recipe } from "@/Types/RecipeType";
+import FavoriteButton from "@/components/FavoriteButton/FavoriteButton";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import { ArrowLeftIcon, Share2 } from "lucide-react-native";
+import React from "react";
 import {
   ImageBackground,
   StyleSheet,
   TouchableOpacity,
   View,
-} from "react-native"
-import ViewShot from "react-native-view-shot"
+} from "react-native";
+import ViewShot from "react-native-view-shot";
 
 interface HeaderProps {
-  recipe: Recipe
-  viewShotRef: React.RefObject<ViewShot>
-  onShare: () => void
+  recipe: Recipe;
+  viewShotRef: React.RefObject<ViewShot>;
+  onShare: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ recipe, viewShotRef, onShare }) => {
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   return (
     <View className="relative h-[400px] rounded-t-2xl overflow-hidden w-full">
@@ -45,9 +46,12 @@ const Header: React.FC<HeaderProps> = ({ recipe, viewShotRef, onShare }) => {
               <ArrowLeftIcon size={20} className="text-primary-light" />
             </TouchableOpacity>
             <View className="flex-row gap-4">
-              <TouchableOpacity className="bg-primary-light/20 rounded-full p-2">
-                <HeartIcon size={20} className="text-primary-light" />
-              </TouchableOpacity>
+              <FavoriteButton
+                recipe={recipe}
+                className="bg-primary-light/20 rounded-full"
+                size={20}
+                color="#FF5F5F"
+              />
               <TouchableOpacity
                 onPress={onShare}
                 className="bg-primary-light/20 rounded-full p-2"
@@ -59,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({ recipe, viewShotRef, onShare }) => {
         </LinearGradient>
       </ImageBackground>
     </View>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

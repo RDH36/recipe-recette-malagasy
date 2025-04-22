@@ -1,21 +1,19 @@
-import { Recipe } from "@/Types/RecipeType"
-import { Clock, Heart, Crown, Sparkles } from "lucide-react-native"
-import React from "react"
-import { Image, Text, TouchableOpacity, View } from "react-native"
-import { isNewRecipe } from "@/utils/utilis"
+import { Recipe } from "@/Types/RecipeType";
+import FavoriteButton from "@/components/FavoriteButton/FavoriteButton";
+import { ChefHat, Clock, Crown } from "lucide-react-native";
+import React from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface RecipeCardProps {
-  recipe: Recipe
-  isFavorite: boolean
-  onPress?: () => void
-  style?: "horizontal" | "vertical"
-  allRecipes: Recipe[]
+  recipe: Recipe;
+  onPress?: () => void;
+  style?: "horizontal" | "vertical";
+  allRecipes: Recipe[];
 }
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({
   recipe,
   onPress,
-  isFavorite,
   style = "vertical",
   allRecipes,
 }) => {
@@ -30,26 +28,33 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         </View>
       )}
     </View>
-  )
+  );
 
   if (style === "horizontal") {
     return (
       <TouchableOpacity onPress={onPress} className="w-[280px] mr-4">
         <View className="bg-neutral-white rounded-2xl shadow-sm border border-neutral-light">
           <View className="relative">
-            <Image
-              source={recipe.image}
-              className="w-full h-[180px] rounded-t-2xl"
-              resizeMode="cover"
-            />
-            {renderBadges()}
-            <TouchableOpacity className="absolute top-2 right-2 bg-primary-light/20 rounded-full p-1.5">
-              <Heart
-                size={20}
-                className="text-primary-light"
-                fill={isFavorite ? "#212121" : "none"}
+            {recipe.image ? (
+              <Image
+                source={recipe.image}
+                className="w-full h-[180px] rounded-t-2xl"
+                resizeMode="cover"
               />
-            </TouchableOpacity>
+            ) : (
+              <View className="w-full h-full bg-muted flex items-center justify-center">
+                <ChefHat className="h-12 w-12 text-muted-foreground" />
+              </View>
+            )}
+            {renderBadges()}
+            <View className="absolute top-2 right-2">
+              <FavoriteButton
+                recipe={recipe}
+                className="bg-primary-light/20 rounded-full"
+                size={20}
+                color="#FF5F5F"
+              />
+            </View>
           </View>
 
           <View className="p-3">
@@ -80,7 +85,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
           </View>
         </View>
       </TouchableOpacity>
-    )
+    );
   }
 
   return (
@@ -116,13 +121,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
               </View>
             </View>
 
-            <TouchableOpacity className="bg-primary-light/20 rounded-full p-1.5">
-              <Heart
-                size={20}
-                className="text-primary-light"
-                fill={isFavorite ? "#212121" : "none"}
-              />
-            </TouchableOpacity>
+            <FavoriteButton
+              recipe={recipe}
+              className="bg-primary-light/20 rounded-full"
+              size={20}
+              color="#FF5F5F"
+            />
           </View>
 
           <Text className="text-text-secondary text-sm mt-1" numberOfLines={2}>
@@ -131,5 +135,5 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
         </View>
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};

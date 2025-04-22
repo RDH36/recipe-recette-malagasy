@@ -1,126 +1,125 @@
-import { RecipeCard } from "@/components/RecipeCard/RecipeCard"
-import Search from "@/components/Search/Search"
-import { useStore } from "@/store/useStore"
-import { router, useNavigation } from "expo-router"
-import { ArrowLeftIcon, ChevronDown } from "lucide-react-native"
-import React, { useEffect, useState, useCallback } from "react"
+import { Recipe } from "@/Types/RecipeType";
+import { RecipeCard } from "@/components/RecipeCard/RecipeCard";
+import { DifficultyFilters } from "@/components/Search/DifficultyFilters";
+import Search from "@/components/Search/Search";
+import { SortOptions } from "@/components/Search/SortOptions";
+import { getRecipes } from "@/services/recipeService";
+import { useStore } from "@/store/useStore";
+import { router, useNavigation } from "expo-router";
+import { ArrowLeftIcon } from "lucide-react-native";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  ScrollView,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
-  FlatList,
-  ActivityIndicator,
-} from "react-native"
-import { Recipe } from "@/Types/RecipeType"
-import { getRecipes } from "@/services/recipeService"
-import { DifficultyFilters } from "@/components/Search/DifficultyFilters"
-import { SortOptions } from "@/components/Search/SortOptions"
+} from "react-native";
 
-const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"]
+const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"];
 const sortOptions = [
   "Découvertes",
   "Populaires",
   "Temps de préparation",
   "Premium",
-]
+];
 
 export default function SearchScreen() {
-  const navigation = useNavigation()
-  const [selectedFilter, setSelectedFilter] = useState("Tous")
-  const [showSortOptions, setShowSortOptions] = useState(false)
-  const selectedCategory = useStore((state) => state.selectedCategory)
-  const setSelectedCategory = useStore((state) => state.setSelectedCategory)
+  const navigation = useNavigation();
+  const [selectedFilter, setSelectedFilter] = useState("Tous");
+  const [showSortOptions, setShowSortOptions] = useState(false);
+  const selectedCategory = useStore((state) => state.selectedCategory);
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
   const [selectedSort, setSelectedSort] = useState(
     selectedCategory || "Découvertes"
-  )
-  const [refreshing, setRefreshing] = useState(false)
-  const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
+  );
+  const [refreshing, setRefreshing] = useState(false);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (selectedCategory) {
-      setSelectedSort(selectedCategory)
+      setSelectedSort(selectedCategory);
     }
-  }, [selectedCategory])
+  }, [selectedCategory]);
 
   const fetchRecipes = async () => {
     try {
-      const data = await getRecipes()
-      setRecipes(data)
+      const data = await getRecipes();
+      setRecipes(data);
     } catch (err) {
-      setError("Une erreur est survenue lors du chargement des recettes")
-      console.error("Error fetching recipes:", err)
+      setError("Une erreur est survenue lors du chargement des recettes");
+      console.error("Error fetching recipes:", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchRecipes()
-  }, [])
+    fetchRecipes();
+  }, []);
 
   const onRefresh = useCallback(async () => {
-    setRefreshing(true)
-    await fetchRecipes()
-    setRefreshing(false)
-  }, [])
+    setRefreshing(true);
+    await fetchRecipes();
+    setRefreshing(false);
+  }, []);
 
   const handleSortChange = (option: string) => {
-    setSelectedSort(option)
-    setSelectedCategory(option)
-    setShowSortOptions(false)
-  }
+    setSelectedSort(option);
+    setSelectedCategory(option);
+    setShowSortOptions(false);
+  };
 
   const backButton = () => {
-    setSelectedCategory("Découvertes")
-    navigation.goBack()
-  }
+    setSelectedCategory("Découvertes");
+    navigation.goBack();
+  };
 
   const filteredRecipes = React.useMemo(() => {
-    let filtered = [...recipes]
+    let filtered = [...recipes];
 
     if (searchQuery) {
       filtered = filtered.filter((recipe) =>
         recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      );
     }
 
     if (selectedFilter !== "Tous") {
       filtered = filtered.filter(
         (recipe) => recipe.difficulty === selectedFilter
-      )
+      );
     }
 
     switch (selectedSort) {
       case "Premium":
-        return filtered.filter((recipe) => recipe.isPremium)
+        return filtered.filter((recipe) => recipe.isPremium);
       case "Populaires":
-        return filtered
+        return filtered;
       case "Temps de préparation":
-        return filtered.sort((a, b) => a.time - b.time)
+        return filtered.sort((a, b) => a.time - b.time);
       default:
-        return filtered
+        return filtered;
     }
-  }, [selectedSort, selectedFilter, recipes, searchQuery])
+  }, [selectedSort, selectedFilter, recipes, searchQuery]);
 
   const sortedRecipes = React.useMemo(() => {
     return [...filteredRecipes].sort((a, b) => {
       switch (selectedSort) {
         case "Populaires":
-          return b.rating - a.rating
+          return b.category === "Populaires" ? 1 : -1;
         case "Temps de préparation":
-          return a.cookingTime - b.cookingTime
+          return a.time - b.time;
         case "Premium":
-          return b.isPremium ? 1 : -1
+          return b.isPremium ? 1 : -1;
         default:
-          return 0
+          return 0;
       }
-    })
-  }, [selectedSort, filteredRecipes])
+    });
+  }, [selectedSort, filteredRecipes]);
 
   return (
     <View className="flex gap-2 bg-neutral-white h-full">
@@ -178,7 +177,6 @@ export default function SearchScreen() {
             >
               <RecipeCard
                 recipe={item}
-                isFavorite={false}
                 allRecipes={recipes}
                 onPress={() => router.push(`/recipe/${item.id}`)}
               />
@@ -194,5 +192,5 @@ export default function SearchScreen() {
         />
       )}
     </View>
-  )
+  );
 }

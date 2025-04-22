@@ -1,23 +1,23 @@
-import React, { useEffect } from "react"
+import { Text } from "expo-dynamic-fonts";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { ArrowRight, Crown, Sparkles } from "lucide-react-native";
+import { useEffect } from "react";
 import {
-  View,
   Animated,
-  StyleSheet,
   Dimensions,
+  StyleSheet,
   TouchableOpacity,
-} from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
-import { Text } from "expo-dynamic-fonts"
-import { Crown, Sparkles, ArrowRight } from "lucide-react-native"
-import { router } from "expo-router"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window")
+const { width } = Dimensions.get("window");
 
 export default function Congratulation() {
-  const insets = useSafeAreaInsets()
-  const scaleAnim = new Animated.Value(0)
-  const opacityAnim = new Animated.Value(0)
+  const insets = useSafeAreaInsets();
+  const scaleAnim = new Animated.Value(0);
+  const opacityAnim = new Animated.Value(0);
 
   useEffect(() => {
     Animated.parallel([
@@ -32,8 +32,8 @@ export default function Congratulation() {
         duration: 1000,
         useNativeDriver: true,
       }),
-    ]).start()
-  }, [])
+    ]).start();
+  }, []);
 
   return (
     <LinearGradient
@@ -82,7 +82,7 @@ export default function Congratulation() {
         </TouchableOpacity>
       </Animated.View>
     </LinearGradient>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -115,4 +115,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
-})
+});

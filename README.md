@@ -14,6 +14,48 @@ Recipe-Recette-Malagasy est une application [Expo](https://expo.dev) qui présen
 - Catégorisation par région et type de plat
 - Possibilité de sauvegarder vos recettes favorites
 
+## Configuration de la base de données
+
+### Structure de la base de données
+
+L'application utilise Supabase pour la gestion de la base de données et l'authentification. La structure principale inclut :
+
+#### Table `users`
+
+- `id` : UUID (clé primaire, référence à auth.users)
+- `email` : TEXT (email de l'utilisateur)
+- `isPremium` : BOOLEAN (statut premium de l'utilisateur, par défaut FALSE)
+- `favorites` : TEXT[] (tableau des IDs de recettes favorites)
+- `created_at` : TIMESTAMP WITH TIME ZONE
+- `updated_at` : TIMESTAMP WITH TIME ZONE
+
+### Mise en place de la base de données
+
+1. Connectez-vous à votre dashboard Supabase
+2. Allez dans l'onglet "SQL Editor"
+3. Exécutez le script SQL situé dans `migrations/sql/001_create_users_table.sql`
+
+Ce script crée:
+
+- La table `users`
+- Configure Row Level Security (RLS)
+- Ajoute des politiques de sécurité
+- Crée un trigger pour automatiquement insérer un utilisateur après inscription
+
+### Authentification
+
+L'application utilise l'authentification Google via Supabase. Lorsqu'un utilisateur se connecte, il est automatiquement:
+
+1. Authentifié via Google
+2. Ses informations sont stockées dans la table auth.users de Supabase
+3. Un enregistrement est créé dans la table users avec les valeurs par défaut (isPremium = false, favorites = [])
+
+### Fonctionnalités utilisateur
+
+- Gestion des recettes favorites
+- Statut premium (accès à des fonctionnalités exclusives)
+- Mise à jour du profil
+
 ## Démarrage rapide
 
 1. Installer les dépendances

@@ -1,32 +1,32 @@
-import { Recipe } from "@/Types/RecipeType"
-import { useStore } from "@/store/useStore"
-import { useRouter } from "expo-router"
-import { UtensilsCrossedIcon } from "lucide-react-native"
-import React, { useRef } from "react"
-import { Text, TouchableOpacity, View } from "react-native"
-import ViewShot from "react-native-view-shot"
-import Header from "./Header"
-import RecipeInfo from "./RecipeInfo"
-import Ingredients from "./Ingredients"
-import IngredientSubstitutes from "./IngredientSubstitutes"
-import { handleShare } from "@/utils/utilis"
+import { useStore } from "@/store/useStore";
+import { Recipe } from "@/Types/RecipeType";
+import { handleShare } from "@/utils/utilis";
+import { useRouter } from "expo-router";
+import { UtensilsCrossedIcon } from "lucide-react-native";
+import React, { useRef } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
+import ViewShot from "react-native-view-shot";
+import Header from "./Header";
+import Ingredients from "./Ingredients";
+import IngredientSubstitutes from "./IngredientSubstitutes";
+import RecipeInfo from "./RecipeInfo";
 
 interface RecipeDetailProps {
-  recipe: Recipe
+  recipe: Recipe;
 }
 
 const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
-  const router = useRouter()
-  const viewShotRef = useRef<ViewShot>(null)
-  const { isPremium } = useStore()
+  const router = useRouter();
+  const viewShotRef = useRef<ViewShot>(null);
+  const { isPremium } = useStore();
 
   const handleStartCooking = () => {
     if (recipe.isPremium && !isPremium) {
-      router.push("/premium/premium")
-      return
+      router.push("/premium/premium");
+      return;
     }
-    router.push(`/recipe/${recipe.id}/cooking`)
-  }
+    router.push(`/recipe/${recipe.id}/cooking`);
+  };
 
   return (
     <View className="relative flex-1 bg-neutral-white w-full">
@@ -59,7 +59,7 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
         </TouchableOpacity>
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default RecipeDetail
+export default RecipeDetail;

@@ -1,15 +1,15 @@
-import React from "react"
-import { Text, TouchableOpacity, View } from "react-native"
-import { Check } from "lucide-react-native"
+import { Check } from "lucide-react-native";
+import React from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface PricingCardProps {
-  title: string
-  price: string
-  features: string[]
-  buttonText: string
-  onPress: () => void
-  isPopular?: boolean
-  isPrimary?: boolean
+  title: string;
+  price: string;
+  features: string[];
+  buttonText: string;
+  onPress: () => void;
+  isPopular?: boolean;
+  isPrimary?: boolean;
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({
@@ -89,7 +89,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         </Text>
       </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
-export default PricingCard
+export default PricingCard;

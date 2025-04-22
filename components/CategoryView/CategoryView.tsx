@@ -1,14 +1,13 @@
-import { useStore } from "@/store/useStore"
-import { Recipe } from "@/Types/RecipeType"
-import { router } from "expo-router"
-import React from "react"
-import { ScrollView, Text, TouchableOpacity, View } from "react-native"
-import { RecipeCard } from "../RecipeCard/RecipeCard"
+import { useStore } from "@/store/useStore";
+import { Recipe } from "@/Types/RecipeType";
+import { router } from "expo-router";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RecipeCard } from "../RecipeCard/RecipeCard";
 
 interface CategoryViewProps {
-  recipes: Recipe[]
-  title: string
-  allRecipes: Recipe[]
+  recipes: Recipe[];
+  title: string;
+  allRecipes: Recipe[];
 }
 
 export default function CategoryView({
@@ -16,12 +15,12 @@ export default function CategoryView({
   title,
   allRecipes,
 }: CategoryViewProps) {
-  const setSelectedCategory = useStore((state) => state.setSelectedCategory)
+  const setSelectedCategory = useStore((state) => state.setSelectedCategory);
 
   const handleViewAll = () => {
-    setSelectedCategory(title)
-    router.push("/search/Search")
-  }
+    setSelectedCategory(title);
+    router.push("/search/Search");
+  };
 
   return (
     <View className="mt-6">
@@ -41,7 +40,6 @@ export default function CategoryView({
           <RecipeCard
             key={recipe.id}
             recipe={recipe}
-            isFavorite={false}
             style="horizontal"
             onPress={() => router.push(`/recipe/${recipe.id}`)}
             allRecipes={allRecipes}
@@ -49,5 +47,5 @@ export default function CategoryView({
         ))}
       </ScrollView>
     </View>
-  )
+  );
 }

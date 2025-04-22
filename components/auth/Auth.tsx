@@ -1,11 +1,12 @@
 import { supabase } from "@/config/supabase";
+import { createOrUpdateUser } from "@/services/userServices";
 import {
   GoogleSignin,
-  GoogleSigninButton,
   isErrorWithCode,
   isSuccessResponse,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import { Image, Text, TouchableOpacity } from "react-native";
 
 export default function Auth() {
   GoogleSignin.configure({
@@ -23,10 +24,9 @@ export default function Auth() {
             token: response.data.idToken,
           });
           if (error) {
-            console.log("error", error);
           }
-          if (data) {
-            console.log("data", data);
+          if (data && data.user) {
+            await createOrUpdateUser(data.user.id, data.user.email || "");
           }
         }
       } else {
@@ -50,12 +50,17 @@ export default function Auth() {
   };
 
   return (
-    <GoogleSigninButton
-      size={GoogleSigninButton.Size.Wide}
-      color={GoogleSigninButton.Color.Dark}
-      onPress={() => {
-        signIn();
-      }}
-    />
+    <TouchableOpacity
+      onPress={signIn}
+      className="bg-neutral-white py-4 rounded-2xl flex-row items-center justify-center shadow-lg"
+    >
+      <Image
+        source={require("@/assets/icons/google.png")}
+        className="w-5 h-5 mr-3"
+      />
+      <Text className="text-text-primary font-semibold text-base">
+        Continuer avec Google
+      </Text>
+    </TouchableOpacity>
   );
 }
