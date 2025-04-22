@@ -39,3 +39,6 @@ app-example
 
 android/
 ios/
+
+# EAS Build
+eas.json
