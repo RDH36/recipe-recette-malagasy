@@ -14,9 +14,9 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "https://lmcgzleqhenulzmupikg.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtY2d6bGVxaGVudWx6bXVwaWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQyMDUyOTgsImV4cCI6MjA1OTc4MTI5OH0.9HciuTwuktBPBCu-KHecSd3CFk3GeZ8SBPcw2hS408g",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "910146164166-drvn0k84bn7o41q09guojbm9r0dsg4ip.apps.googleusercontent.com"
+        "EXPO_PUBLIC_SUPABASE_URL": "",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": ""
       },
       "android": {
         "buildType": "apk"

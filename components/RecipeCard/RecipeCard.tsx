@@ -33,7 +33,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   if (style === "horizontal") {
     return (
       <TouchableOpacity onPress={onPress} className="w-[280px] mr-4">
-        <View className="bg-neutral-white rounded-2xl shadow-sm border border-neutral-light">
+        <View className="bg-neutral-white rounded-2xl border border-neutral-light">
           <View className="relative">
             {recipe.image ? (
               <Image
@@ -42,7 +42,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
                 resizeMode="cover"
               />
             ) : (
-              <View className="w-full h-full bg-muted flex items-center justify-center">
+              <View className="w-full h-[180px] bg-muted flex items-center justify-center">
                 <ChefHat className="h-12 w-12 text-muted-foreground" />
               </View>
             )}
@@ -89,14 +89,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
   }
 
   return (
-    <TouchableOpacity onPress={onPress} className="w-full mb-4">
-      <View className="flex-row bg-neutral-white rounded-2xl shadow-sm border border-neutral-light overflow-hidden">
+    <TouchableOpacity onPress={onPress} className="bg-white w-full mb-4">
+      <View className="flex-row bg-neutral-white rounded-2xl border border-neutral-light overflow-hidden">
         <View className="relative">
-          <Image
-            source={recipe.image}
-            className="w-[120px] h-[120px]"
-            resizeMode="cover"
-          />
+          {recipe.image ? (
+            <Image
+              source={recipe.image}
+              className="w-[120px] h-[120px]"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-[120px] h-[120px] bg-muted flex items-center justify-center">
+              <ChefHat className="h-12 w-12 text-muted-foreground" />
+            </View>
+          )}
           {renderBadges()}
         </View>
 
