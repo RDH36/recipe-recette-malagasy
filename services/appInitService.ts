@@ -5,65 +5,162 @@ import { useStore } from "@/store/useStore";
 import { Recipe } from "@/Types/RecipeType";
 import { Session } from "@supabase/supabase-js";
 
+// Constantes pour la gestion des tentatives
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 seconde
+
 /**
- * Initialise les données de l'application au démarrage
+ * Fonction utilitaire pour attendre un délai spécifié
+ */
+const wait = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
+ * Réinitialise tous les états et effectue une déconnexion propre
+ */
+const resetAppState = async (): Promise<void> => {
+  try {
+    // Déconnexion explicite de Supabase pour nettoyer les tokens
+    await supabase.auth.signOut();
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion:", error);
+  } finally {
+    // Réinitialiser tous les états, quelle que soit l'issue de la déconnexion
+    useStore.getState().setUser(null);
+    useStore.getState().setIsPremium(false);
+    useStore.getState().setIsLifetime(false);
+    useStore.getState().setFavorites([]);
+  }
+};
+
+/**
+ * Initialise les données de l'application au démarrage avec gestion des tentatives
  */
 export const initAppData = async (): Promise<void> => {
-  try {
-    // Récupérer la session actuelle
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+  let retryCount = 0;
 
-    // Si aucune session, réinitialiser les états
-    if (!session) {
-      // Réinitialiser l'état utilisateur et premium
-      useStore.getState().setUser(null);
-      useStore.getState().setIsPremium(false);
-      useStore.getState().setFavorites([]);
-      return;
+  while (retryCount < MAX_RETRIES) {
+    try {
+      // Récupérer la session actuelle
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) {
+        // Vérifier si c'est une erreur de token invalide
+        if (error.message && error.message.includes("Invalid Refresh Token")) {
+          console.log(
+            "Token de rafraîchissement invalide détecté, réinitialisation de l'état"
+          );
+          await resetAppState();
+          return; // Sortir de la fonction après réinitialisation
+        }
+        throw error;
+      }
+
+      // Si aucune session, réinitialiser les états
+      if (!session) {
+        await resetAppState();
+        return;
+      }
+
+      // Charger les données utilisateur
+      await loadUserData(session);
+      return; // Succès, on sort de la fonction
+    } catch (error) {
+      // Vérifier si c'est une erreur d'authentification
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      if (
+        errorMessage.includes("Invalid Refresh Token") ||
+        errorMessage.includes("Refresh Token Not Found") ||
+        errorMessage.includes("JWT expired")
+      ) {
+        console.log(
+          "Erreur d'authentification détectée, réinitialisation de l'état"
+        );
+        await resetAppState();
+        return; // Sortir directement de la fonction
+      }
+
+      console.error(
+        `Tentative ${retryCount + 1}/${MAX_RETRIES} échouée:`,
+        error
+      );
+      retryCount++;
+
+      if (retryCount < MAX_RETRIES) {
+        await wait(RETRY_DELAY);
+      } else {
+        console.error(
+          "Erreur lors de l'initialisation de l'app après plusieurs tentatives:",
+          error
+        );
+        // Réinitialiser les états en cas d'échec final
+        await resetAppState();
+      }
     }
-
-    // Charger les données utilisateur
-    await loadUserData(session);
-  } catch (error) {
-    console.error("Erreur lors de l'initialisation de l'app:", error);
   }
 };
 
 /**
- * Charge les données de l'utilisateur et met à jour le store
+ * Charge les données de l'utilisateur et met à jour le store avec gestion des tentatives
  */
 export const loadUserData = async (session: Session): Promise<void> => {
-  try {
-    const userId = session.user.id;
-    const email = session.user.email || "";
+  let retryCount = 0;
 
-    // Créer ou récupérer l'utilisateur
-    const user = await createOrUpdateUser(userId, email);
+  while (retryCount < MAX_RETRIES) {
+    try {
+      const userId = session.user.id;
+      const email = session.user.email || "";
 
-    if (user) {
-      // Mettre à jour l'état utilisateur
-      useStore.getState().setUser(user);
+      // Créer ou récupérer l'utilisateur
+      const user = await createOrUpdateUser(userId, email);
 
-      // Mettre à jour l'état premium
-      const isPremium = user.isPremium;
-      useStore.getState().setIsPremium(isPremium);
+      if (user) {
+        // Mettre à jour l'état utilisateur
+        useStore.getState().setUser(user);
 
-      // Charger les favoris
-      await loadFavoriteRecipes(user.favorites);
+        // Mettre à jour l'état premium
+        const isPremium = user.isPremium;
+        useStore.getState().setIsPremium(isPremium);
+
+        // Mettre à jour l'état lifetime
+        const isLifetime = user.isLifetime;
+        useStore.getState().setIsLifetime(isLifetime);
+
+        // Charger les favoris
+        await loadFavoriteRecipes(user.favorites);
+      }
+      return; // Succès, on sort de la fonction
+    } catch (error) {
+      console.error(
+        `Tentative ${retryCount + 1}/${MAX_RETRIES} échouée:`,
+        error
+      );
+      retryCount++;
+
+      if (retryCount < MAX_RETRIES) {
+        await wait(RETRY_DELAY);
+      } else {
+        console.error(
+          "Erreur lors du chargement des données utilisateur après plusieurs tentatives:",
+          error
+        );
+      }
     }
-  } catch (error) {
-    console.error("Erreur lors du chargement des données utilisateur:", error);
   }
 };
 
 /**
- * Charge les recettes favorites de l'utilisateur
+ * Charge les recettes favorites de l'utilisateur avec gestion des erreurs améliorée
  */
 const loadFavoriteRecipes = async (favoriteIds: string[]): Promise<void> => {
   try {
-    if (favoriteIds.length === 0) {
+    if (!favoriteIds || favoriteIds.length === 0) {
       useStore.getState().setFavorites([]);
       return;
     }
@@ -91,6 +188,8 @@ const loadFavoriteRecipes = async (favoriteIds: string[]): Promise<void> => {
     useStore.getState().setFavorites(favoriteRecipes);
   } catch (error) {
     console.error("Erreur lors du chargement des recettes favorites:", error);
+    // En cas d'erreur, on définit simplement un tableau vide
+    useStore.getState().setFavorites([]);
   }
 };
 
@@ -108,6 +207,7 @@ export const setupAuthStateListener = (): (() => void) => {
       // Utilisateur déconnecté
       useStore.getState().setUser(null);
       useStore.getState().setIsPremium(false);
+      useStore.getState().setIsLifetime(false);
       useStore.getState().setFavorites([]);
     }
   });

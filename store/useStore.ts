@@ -11,6 +11,10 @@ interface Store {
   isPremium: boolean;
   setIsPremium: (status: boolean) => void;
 
+  // État abonnement à vie
+  isLifetime: boolean;
+  setIsLifetime: (status: boolean) => void;
+
   // État catégorie
   selectedCategory: string | null;
   setSelectedCategory: (category: string | null) => void;
@@ -31,6 +35,10 @@ export const useStore = create<Store>((set, get) => ({
   // État premium
   isPremium: false,
   setIsPremium: (status) => set({ isPremium: status }),
+
+  // État abonnement à vie
+  isLifetime: false,
+  setIsLifetime: (status) => set({ isLifetime: status }),
 
   // État catégorie
   selectedCategory: null,

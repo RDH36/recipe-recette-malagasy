@@ -5,6 +5,7 @@ export interface User {
   id: string;
   email: string;
   isPremium: boolean;
+  isLifetime: boolean;
   favorites: string[];
   created_at?: string;
   updated_at?: string;
@@ -47,6 +48,7 @@ export const createOrUpdateUser = async (
       id: userId,
       email,
       isPremium: false, // Par défaut, l'utilisateur n'est pas premium
+      isLifetime: false, // Par défaut, l'utilisateur n'a pas d'abonnement à vie
       favorites: [], // Tableau vide pour les favoris
     };
 
@@ -86,6 +88,33 @@ export const updatePremiumStatus = async (
     return !error;
   } catch (error) {
     console.error("Erreur lors de la mise à jour du statut premium:", error);
+    return false;
+  }
+};
+
+/**
+ * Met à jour le statut d'abonnement à vie d'un utilisateur
+ * @param userId ID de l'utilisateur
+ * @param isLifetime Nouveau statut d'abonnement à vie
+ * @returns Succès de l'opération
+ */
+export const updateLifetimeStatus = async (
+  userId: string,
+  isLifetime: boolean
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from("users")
+      .update({
+        isLifetime,
+        isPremium: isLifetime ? true : undefined, // Si l'abonnement est à vie, l'utilisateur est aussi premium
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    return !error;
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du statut lifetime:", error);
     return false;
   }
 };
@@ -231,6 +260,85 @@ export const isUserPremium = async (userId: string): Promise<boolean> => {
     return data.isPremium || false;
   } catch (error) {
     console.error("Erreur inattendue:", error);
+    return false;
+  }
+};
+
+/**
+ * Vérifie si l'utilisateur a un abonnement à vie
+ * @param userId ID de l'utilisateur
+ * @returns true si l'utilisateur a un abonnement à vie, false sinon
+ */
+export const isUserLifetime = async (userId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("isLifetime")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error(
+        "Erreur lors de la vérification du statut lifetime:",
+        error
+      );
+      return false;
+    }
+
+    return data.isLifetime || false;
+  } catch (error) {
+    console.error("Erreur inattendue:", error);
+    return false;
+  }
+};
+
+/**
+ * Annule l'abonnement premium d'un utilisateur
+ * @param userId ID de l'utilisateur
+ * @returns Succès de l'opération
+ */
+export const cancelPremiumSubscription = async (
+  userId: string
+): Promise<boolean> => {
+  try {
+    // Vérifier si l'utilisateur a un abonnement à vie
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("isLifetime")
+      .eq("id", userId)
+      .single();
+
+    if (userError) {
+      console.error(
+        "Erreur lors de la vérification du statut lifetime:",
+        userError
+      );
+      return false;
+    }
+
+    // Si l'utilisateur a un abonnement à vie, on ne peut pas annuler son statut premium
+    if (userData.isLifetime) {
+      console.log("Impossible d'annuler un abonnement à vie");
+      return false;
+    }
+
+    // Mettre à jour le statut premium
+    const { error } = await supabase
+      .from("users")
+      .update({
+        isPremium: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Erreur lors de l'annulation de l'abonnement:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de l'annulation de l'abonnement:", error);
     return false;
   }
 };

@@ -1,10 +1,11 @@
 import { useStore } from "@/store/useStore";
 import { Recipe } from "@/Types/RecipeType";
 import { handleShare } from "@/utils/utilis";
+import { Text } from "expo-dynamic-fonts";
 import { useRouter } from "expo-router";
 import { UtensilsCrossedIcon } from "lucide-react-native";
 import React, { useRef } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import ViewShot from "react-native-view-shot";
 import Header from "./Header";
 import Ingredients from "./Ingredients";
@@ -28,22 +29,46 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe }) => {
     router.push(`/recipe/${recipe.id}/cooking`);
   };
 
+  const ShareContent = () => (
+    <View className="items-center bg-neutral-white">
+      <Header
+        recipe={recipe}
+        viewShotRef={viewShotRef}
+        onShare={() => handleShare(viewShotRef, recipe)}
+      />
+      <RecipeInfo recipe={recipe} isPremium={isPremium} />
+      <View className="mt-4 flex-1 px-4">
+        <Ingredients recipe={recipe} />
+        {recipe.substitutes && (
+          <IngredientSubstitutes substitutes={recipe.substitutes} />
+        )}
+      </View>
+    </View>
+  );
   return (
     <View className="relative flex-1 bg-neutral-white w-full">
-      <ViewShot ref={viewShotRef}>
-        <Header
-          recipe={recipe}
-          viewShotRef={viewShotRef}
-          onShare={() => handleShare(viewShotRef, recipe)}
-        />
-        <RecipeInfo recipe={recipe} isPremium={isPremium} />
-        <View className="mt-4 flex-1 px-4">
-          <Ingredients recipe={recipe} />
-          {recipe.substitutes && (
-            <IngredientSubstitutes substitutes={recipe.substitutes} />
-          )}
-        </View>
-      </ViewShot>
+      <Header
+        recipe={recipe}
+        viewShotRef={viewShotRef}
+        onShare={() => handleShare(viewShotRef, recipe)}
+      />
+      <RecipeInfo recipe={recipe} isPremium={isPremium} />
+      <View className="mt-4 flex-1 px-4">
+        <Ingredients recipe={recipe} />
+        {recipe.substitutes && (
+          <IngredientSubstitutes substitutes={recipe.substitutes} />
+        )}
+      </View>
+
+      <View>
+        <ViewShot
+          ref={viewShotRef}
+          options={{ format: "png", quality: 1 }}
+          style={{ position: "absolute", opacity: 0 }}
+        >
+          <ShareContent />
+        </ViewShot>
+      </View>
 
       <View className=" px-4 bg-white pb-4 mt-4">
         <TouchableOpacity

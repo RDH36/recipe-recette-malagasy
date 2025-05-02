@@ -4,12 +4,11 @@ import { useStore } from "@/store/useStore";
 import { Session } from "@supabase/supabase-js";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Bell, LogOut } from "lucide-react-native";
+import { CreditCard, Crown, Diamond, Heart, LogOut } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -21,7 +20,7 @@ export default function Profile() {
   const [session, setSession] = useState<Session | null>(null);
 
   // Récupérer les états globaux
-  const { user, isPremium } = useStore();
+  const { user, isPremium, isLifetime } = useStore();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -90,9 +89,35 @@ export default function Profile() {
             </Text>
             <Text className="text-text-secondary"> {session?.user?.email}</Text>
 
-            {isPremium && (
+            {isLifetime && (
+              <LinearGradient
+                colors={["#FF5F5F", "#CB69C1"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  borderRadius: 20,
+                  paddingHorizontal: 12,
+                  paddingVertical: 4,
+                  marginTop: 8,
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Diamond size={14} color="white" style={{ marginRight: 4 }} />
+                  <Text style={{ color: "white", fontWeight: "500" }}>
+                    Premium à Vie
+                  </Text>
+                </View>
+              </LinearGradient>
+            )}
+
+            {isPremium && !isLifetime && (
               <View className="bg-primary/10 px-3 py-1 rounded-full mt-2">
-                <Text className="text-primary font-medium">Premium</Text>
+                <View className="flex-row items-center">
+                  <Crown size={14} className="text-primary mr-1" />
+                  <Text className="text-primary font-medium">
+                    Premium Mensuel
+                  </Text>
+                </View>
               </View>
             )}
           </View>
@@ -121,21 +146,43 @@ export default function Profile() {
 
         <View className=" flex gap-4 mt-6 space-y-4">
           <View className="bg-white rounded-2xl shadow-sm">
-            <TouchableOpacity className="flex-row items-center justify-between p-4 border-t border-neutral-100">
+            <TouchableOpacity
+              className="flex-row items-center justify-between p-4 border-b border-neutral-100"
+              onPress={() => router.push("/(tabs)/bookmarks/bookmarks")}
+            >
               <View className="flex-row items-center">
                 <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Bell size={20} className="text-primary" />
+                  <Heart size={20} className="text-primary" />
                 </View>
                 <Text className="text-text-primary font-medium ml-3">
-                  Notifications
+                  Mes favoris
                 </Text>
               </View>
-              <Switch
-                value={notifications}
-                onValueChange={setNotifications}
-                trackColor={{ false: "#E0E0E0", true: "#FF5F5F" }}
-                thumbColor="#FFFFFF"
-              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className="flex-row items-center justify-between p-4 border-b border-neutral-100"
+              onPress={() => router.push("/premium/premium")}
+            >
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
+                  <CreditCard size={20} className="text-primary" />
+                </View>
+                <Text className="text-text-primary font-medium ml-3">
+                  Mon abonnement
+                </Text>
+              </View>
+              {isPremium && (
+                <View
+                  className={`${
+                    isLifetime ? "bg-secondary" : "bg-primary"
+                  } px-2 py-1 rounded-full`}
+                >
+                  <Text className="text-white text-xs font-medium">
+                    {isLifetime ? "À vie" : "Mensuel"}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
 

@@ -1,50 +1,115 @@
 import SplashScreenAnimated from "@/components/SplashScreen/SplashScreen";
+import { supabase } from "@/config/supabase";
 import { initAppData, setupAuthStateListener } from "@/services/appInitService";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { AppState, AppStateStatus, StyleSheet } from "react-native";
 import "../global.css";
 
-// Empêcher le splash screen natif de se fermer automatiquement
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch((error) => {
+  console.warn(
+    "Erreur lors de la prévention de la fermeture du splash screen:",
+    error
+  );
+});
+
+const MAX_INIT_TIME = 5000;
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
+  const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     Pacifico: require("../assets/fonts/Pacifico-Regular.ttf"),
   });
   const [isReady, setIsReady] = useState(false);
+  const [initAttempt, setInitAttempt] = useState(0);
+
+  // Nettoyer les sessions invalides au lancement de l'application
+  useEffect(() => {
+    const cleanupInvalidSessions = async () => {
+      try {
+        const { error } = await supabase.auth.getSession();
+
+        if (
+          error &&
+          (error.message.includes("Invalid Refresh Token") ||
+            error.message.includes("Refresh Token Not Found") ||
+            error.message.includes("JWT expired"))
+        ) {
+          console.log("Session invalide détectée au démarrage, nettoyage...");
+          await supabase.auth.signOut();
+        }
+      } catch (err) {
+        console.warn("Erreur lors de la vérification de session:", err);
+      }
+    };
+
+    cleanupInvalidSessions();
+  }, []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (nextAppState === "active" && !isReady) {
+      setInitAttempt((prev) => prev + 1);
+    }
+  };
 
   useEffect(() => {
     async function prepare() {
       try {
+        if (!loaded && error) {
+          console.warn("Erreur lors du chargement des polices:", error);
+        }
+
+        await initAppData().catch((e) => {
+          console.warn("Erreur lors de l'initialisation des données:", e);
+        });
+
+        const timeoutId = setTimeout(() => {
+          if (!isReady) {
+            console.warn(
+              "Délai d'initialisation dépassé, démarrage forcé de l'application"
+            );
+            SplashScreen.hideAsync().catch((e) => console.warn(e));
+            setIsReady(true);
+          }
+        }, MAX_INIT_TIME);
+
         if (loaded) {
-          // Initialiser les données de l'application
-          await initAppData();
+          await SplashScreen.hideAsync().catch((e) => console.warn(e));
 
-          // Cacher le splash screen natif
-          await SplashScreen.hideAsync();
-
-          // Afficher l'écran de chargement personnalisé pendant 2 secondes
           setTimeout(() => {
             setIsReady(true);
+            clearTimeout(timeoutId);
           }, 2000);
         }
+
+        return () => clearTimeout(timeoutId);
       } catch (e) {
-        console.warn(e);
+        console.warn("Erreur lors de la préparation de l'application:", e);
+        setTimeout(() => {
+          SplashScreen.hideAsync().catch((e) => console.warn(e));
+          setIsReady(true);
+        }, 1000);
       }
     }
 
     prepare();
-  }, [loaded]);
+  }, [loaded, initAttempt]);
 
-  // Configurer l'écouteur d'état d'authentification
   useEffect(() => {
     const unsubscribe = setupAuthStateListener();
 
-    // Nettoyer l'abonnement quand le composant est démonté
     return () => {
       unsubscribe();
     };

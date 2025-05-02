@@ -1,118 +1,196 @@
-import { Text } from "expo-dynamic-fonts";
+import { useStore } from "@/store/useStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowRight, Crown, Sparkles } from "lucide-react-native";
+import { BadgeCheck, Diamond, Star } from "lucide-react-native";
 import { useEffect } from "react";
 import {
-  Animated,
-  Dimensions,
-  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
-const { width } = Dimensions.get("window");
+export default function PremiumCongratulationScreen() {
+  const { isPremium, isLifetime } = useStore();
 
-export default function Congratulation() {
-  const insets = useSafeAreaInsets();
-  const scaleAnim = new Animated.Value(0);
-  const opacityAnim = new Animated.Value(0);
+  // Initialisation des valeurs partagées pour l'animation
+  const scaleValue = useSharedValue(1);
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
 
+  // Animation de pulsation pour le badge
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 50,
-        friction: 7,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // Animation de pulsation avec withDelay pour éviter les problèmes d'immutabilité
+    const animationTimeout = setTimeout(() => {
+      scaleValue.value = withDelay(
+        100,
+        withRepeat(
+          withSequence(
+            withTiming(1.1, { duration: 700 }),
+            withTiming(1, { duration: 700 })
+          ),
+          3
+        )
+      );
+
+      // Animation de montée pour les éléments
+      translateY.value = withDelay(200, withTiming(0, { duration: 800 }));
+
+      opacity.value = withDelay(200, withTiming(1, { duration: 800 }));
+    }, 100);
+
+    return () => clearTimeout(animationTimeout);
   }, []);
 
+  // Définition des styles animés
+  const badgeStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleValue.value }],
+    };
+  });
+
+  const contentStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+      opacity: opacity.value,
+    };
+  });
+
+  // Titre et message adaptés au type d'abonnement
+  const title = isLifetime
+    ? "Félicitations pour Votre Premium à Vie!"
+    : "Félicitations pour Votre Abonnement Premium!";
+
+  const message = isLifetime
+    ? "Profitez d'un accès illimité à vie à toutes nos recettes exclusives et fonctionnalités premium."
+    : "Profitez d'un accès complet à toutes nos recettes exclusives et fonctionnalités premium.";
+
   return (
-    <LinearGradient
-      colors={["#FF7A29", "#FFD54F"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.container, { paddingTop: insets.top }]}
-    >
-      <Animated.View
-        style={[
-          styles.content,
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: opacityAnim,
-          },
-        ]}
-      >
-        <View style={styles.iconContainer}>
-          <Crown size={64} color="#FFFFFF" />
-          <Sparkles size={32} color="#FFFFFF" style={styles.sparkles} />
+    <SafeAreaView className="flex-1 bg-neutral-white">
+      <StatusBar barStyle="dark-content" />
+      <ScrollView className="flex-1 p-4">
+        <View className="items-center justify-center">
+          <Animated.View style={badgeStyle} className="items-center my-10">
+            <View className="w-32 h-32 rounded-full bg-primary/5 items-center justify-center">
+              <LinearGradient
+                colors={
+                  isLifetime ? ["#FF5F5F", "#CB69C1"] : ["#6C72CB", "#CB69C1"]
+                }
+                className="w-24 h-24 rounded-full items-center justify-center"
+              >
+                {isLifetime ? (
+                  <Diamond size={48} color="white" />
+                ) : (
+                  <Star size={48} color="white" />
+                )}
+              </LinearGradient>
+            </View>
+          </Animated.View>
+
+          <Animated.View
+            style={contentStyle}
+            className="w-full items-center px-4"
+          >
+            <Text className="text-3xl font-bold text-text-primary text-center mb-4">
+              {title}
+            </Text>
+
+            <Text className="text-text-secondary text-center mb-8">
+              {message}
+            </Text>
+
+            <View className="w-full bg-primary/5 rounded-2xl p-6 mb-8">
+              <Text className="text-lg font-bold text-text-primary mb-4">
+                Ce qui vous attend:
+              </Text>
+
+              <View className="space-y-4">
+                <View className="flex-row">
+                  <BadgeCheck
+                    size={20}
+                    className="text-primary mr-3"
+                    color="#FF5F5F"
+                  />
+                  <Text className="text-text-primary flex-1">
+                    Accès à toutes les recettes authentiques
+                  </Text>
+                </View>
+
+                <View className="flex-row">
+                  <BadgeCheck
+                    size={20}
+                    className="text-primary mr-3"
+                    color="#FF5F5F"
+                  />
+                  <Text className="text-text-primary flex-1">
+                    Collections de recettes régionales
+                  </Text>
+                </View>
+
+                <View className="flex-row">
+                  <BadgeCheck
+                    size={20}
+                    className="text-primary mr-3"
+                    color="#FF5F5F"
+                  />
+                  <Text className="text-text-primary flex-1">
+                    Contexte culturel et historique
+                  </Text>
+                </View>
+
+                <View className="flex-row">
+                  <BadgeCheck
+                    size={20}
+                    className="text-primary mr-3"
+                    color="#FF5F5F"
+                  />
+                  <Text className="text-text-primary flex-1">
+                    Guides de substitution d'ingrédients
+                  </Text>
+                </View>
+
+                {isLifetime && (
+                  <View className="flex-row">
+                    <BadgeCheck
+                      size={20}
+                      className="text-primary mr-3"
+                      color="#FF5F5F"
+                    />
+                    <Text className="text-text-primary flex-1 font-bold">
+                      Accès à vie à toutes les futures mises à jour
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            <TouchableOpacity
+              className="bg-primary w-full py-4 rounded-xl mb-4"
+              onPress={() => router.push("/(tabs)")}
+            >
+              <Text className="text-white text-center font-semibold">
+                Explorer les recettes
+              </Text>
+            </TouchableOpacity>
+
+            <Text className="text-text-disabled text-center text-sm">
+              {isLifetime
+                ? "Votre statut Premium à Vie est activé"
+                : "Votre abonnement sera automatiquement renouvelé à la fin de la période"}
+            </Text>
+          </Animated.View>
         </View>
-
-        <Text
-          className="text-neutral-white text-3xl font-bold mb-4"
-          font="Pacifico"
-        >
-          Félicitations !
-        </Text>
-
-        <Text className="text-neutral-white text-center text-lg mb-2">
-          Vous êtes maintenant un membre premium
-        </Text>
-
-        <Text className="text-neutral-white text-center mb-8">
-          Profitez de tous les avantages exclusifs
-        </Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/search/Search")}
-        >
-          <Text className="text-neutral-white text-lg font-semibold">
-            Voir toutes les recettes
-          </Text>
-          <ArrowRight size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </Animated.View>
-    </LinearGradient>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  content: {
-    alignItems: "center",
-    padding: 20,
-  },
-  iconContainer: {
-    position: "relative",
-    marginBottom: 20,
-  },
-  sparkles: {
-    position: "absolute",
-    top: -10,
-    right: -10,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 30,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-});
