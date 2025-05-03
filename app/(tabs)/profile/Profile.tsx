@@ -1,4 +1,5 @@
 import Auth from "@/components/auth/Auth";
+import Push from "@/components/Push/Push";
 import { supabase } from "@/config/supabase";
 import { useStore } from "@/store/useStore";
 import { Session } from "@supabase/supabase-js";
@@ -195,6 +196,8 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
       </View>
+
+      <Push />
     </View>
   );
 }

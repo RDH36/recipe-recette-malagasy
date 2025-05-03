@@ -2,6 +2,7 @@ import NetworkStatus from "@/components/NetworkStatus/NetworkStatus";
 import SplashScreenAnimated from "@/components/SplashScreen/SplashScreen";
 import { supabase } from "@/config/supabase";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { initAppData, setupAuthStateListener } from "@/services/appInitService";
 import { refreshAuthToken } from "@/services/tokenService";
 import { useFonts } from "expo-font";
@@ -31,11 +32,9 @@ export default function RootLayout() {
   const lastActiveTimestamp = useRef<number>(Date.now());
   const initializationInProgress = useRef<boolean>(false);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
-
-  // Vérification de la connexion réseau
   const { isConnected, isInternetReachable } = useNetworkStatus();
+  const { expoPushToken } = usePushNotifications();
 
-  // Nettoyer les sessions invalides au démarrage et après inactivité
   useEffect(() => {
     const cleanupInvalidSessions = async () => {
       try {
@@ -71,18 +70,15 @@ export default function RootLayout() {
     cleanupInvalidSessions();
   }, [initAttempt]);
 
-  // Rafraîchissement du token lorsque l'application revient au premier plan
   useEffect(() => {
     const handleTokenRefreshOnForeground = (state: AppStateStatus) => {
       if (state === "active") {
-        // Lorsque l'app revient au premier plan, vérifier et rafraîchir le token si nécessaire
         refreshAuthToken().catch((error) => {
           console.warn("Erreur lors du rafraîchissement du token:", error);
         });
       }
     };
 
-    // S'abonner aux changements d'état de l'application
     const subscription = AppState.addEventListener(
       "change",
       handleTokenRefreshOnForeground
@@ -93,7 +89,6 @@ export default function RootLayout() {
     };
   }, []);
 
-  // Gère les changements d'état de l'application (premier plan, arrière-plan)
   useEffect(() => {
     const subscription = AppState.addEventListener(
       "change",
@@ -111,19 +106,15 @@ export default function RootLayout() {
     const becameActive =
       appStateRef.current !== "active" && nextAppState === "active";
 
-    // Mettre à jour la référence d'état
     appStateRef.current = nextAppState;
 
-    // Mettre à jour le timestamp de dernière activité si l'app est active
     if (nextAppState === "active") {
       lastActiveTimestamp.current = currentTimestamp;
 
-      // Si l'application était inactive pendant une longue période et devient active
       if (wasInactive && becameActive) {
         console.log(
           `L'app était inactive pendant ${inactiveTime}ms, redémarrage du processus d'initialisation`
         );
-        // Si l'app est déjà prête, on force une réinitialisation des données mais sans splash screen
         if (isReady) {
           initAppData().catch((e) => {
             console.warn(
@@ -131,9 +122,7 @@ export default function RootLayout() {
               e
             );
           });
-        }
-        // Si l'app n'est pas encore prête ou si l'initialisation est bloquée, réinitialiser
-        else if (!isReady || initializationInProgress.current) {
+        } else if (!isReady || initializationInProgress.current) {
           console.log("Redémarrage forcé de l'initialisation après inactivité");
           initializationInProgress.current = false;
           setInitAttempt((prev) => prev + 1);
@@ -142,12 +131,10 @@ export default function RootLayout() {
     }
   };
 
-  // Effet d'initialisation principal
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | undefined;
 
     async function prepare() {
-      // Marquer que l'initialisation est en cours
       initializationInProgress.current = true;
 
       try {
@@ -155,7 +142,6 @@ export default function RootLayout() {
           console.warn("Erreur lors du chargement des polices:", error);
         }
 
-        // Configurer un timeout pour détecter les blocages d'initialisation
         timeoutId = setTimeout(() => {
           if (!isReady) {
             console.warn(
@@ -167,16 +153,13 @@ export default function RootLayout() {
           }
         }, MAX_INIT_TIME);
 
-        // Initialiser les données de l'application
         await initAppData().catch((e) => {
           console.warn("Erreur lors de l'initialisation des données:", e);
         });
 
-        // Si les polices sont chargées, continuer avec le flux normal
         if (loaded) {
           await SplashScreen.hideAsync().catch((e) => console.warn(e));
 
-          // Petit délai pour afficher l'écran d'accueil animé
           setTimeout(() => {
             initializationInProgress.current = false;
             setIsReady(true);
@@ -185,7 +168,6 @@ export default function RootLayout() {
         }
       } catch (e) {
         console.warn("Erreur lors de la préparation de l'application:", e);
-        // En cas d'erreur, forcer le démarrage après un court délai
         setTimeout(() => {
           initializationInProgress.current = false;
           SplashScreen.hideAsync().catch((e) => console.warn(e));
@@ -202,9 +184,9 @@ export default function RootLayout() {
     };
   }, [loaded, initAttempt]);
 
-  // Configuration de l'écouteur d'état d'authentification
   useEffect(() => {
     const unsubscribe = setupAuthStateListener();
+    console.log(expoPushToken);
     return () => unsubscribe();
   }, []);
 
