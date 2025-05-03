@@ -60,7 +60,7 @@ export default function PremiumBadge() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 120,
+    height: 170,
     marginBottom: 12,
     borderRadius: 20,
     overflow: "hidden",

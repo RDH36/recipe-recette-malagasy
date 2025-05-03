@@ -1,13 +1,16 @@
 import { supabase } from "@/config/supabase";
 import { getRecipeById } from "@/services/recipeService";
+import { getValidSession, refreshAuthToken } from "@/services/tokenService";
 import { createOrUpdateUser } from "@/services/userServices";
 import { useStore } from "@/store/useStore";
 import { Recipe } from "@/Types/RecipeType";
 import { Session } from "@supabase/supabase-js";
 
-// Constantes pour la gestion des tentatives
+// Constantes pour la gestion des tentatives et timeouts
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 seconde
+const API_TIMEOUT = 5000; // 5 secondes pour les appels API
+const NETWORK_TIMEOUT_ERROR = "Délai d'attente de la requête dépassé";
 
 /**
  * Fonction utilitaire pour attendre un délai spécifié
@@ -17,12 +20,41 @@ const wait = (ms: number): Promise<void> => {
 };
 
 /**
+ * Fonction utilitaire pour ajouter un timeout à une promesse
+ */
+const withTimeout = <T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  errorMessage: string
+): Promise<T> => {
+  let timeoutHandle: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutHandle = setTimeout(
+      () => reject(new Error(errorMessage)),
+      timeoutMs
+    );
+  });
+
+  return Promise.race([
+    promise.then((result) => {
+      clearTimeout(timeoutHandle);
+      return result;
+    }),
+    timeoutPromise,
+  ]);
+};
+
+/**
  * Réinitialise tous les états et effectue une déconnexion propre
  */
 const resetAppState = async (): Promise<void> => {
   try {
     // Déconnexion explicite de Supabase pour nettoyer les tokens
-    await supabase.auth.signOut();
+    await withTimeout(
+      supabase.auth.signOut(),
+      API_TIMEOUT,
+      "La déconnexion a pris trop de temps"
+    );
   } catch (error) {
     console.error("Erreur lors de la déconnexion:", error);
   } finally {
@@ -42,26 +74,12 @@ export const initAppData = async (): Promise<void> => {
 
   while (retryCount < MAX_RETRIES) {
     try {
-      // Récupérer la session actuelle
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+      // Utiliser le nouveau service de gestion des tokens pour obtenir une session valide
+      const session = await getValidSession();
 
-      if (error) {
-        // Vérifier si c'est une erreur de token invalide
-        if (error.message && error.message.includes("Invalid Refresh Token")) {
-          console.log(
-            "Token de rafraîchissement invalide détecté, réinitialisation de l'état"
-          );
-          await resetAppState();
-          return; // Sortir de la fonction après réinitialisation
-        }
-        throw error;
-      }
-
-      // Si aucune session, réinitialiser les états
+      // Si aucune session valide n'a pu être obtenue (même après tentative de rafraîchissement)
       if (!session) {
+        console.log("Aucune session valide, réinitialisation de l'état");
         await resetAppState();
         return;
       }
@@ -70,7 +88,7 @@ export const initAppData = async (): Promise<void> => {
       await loadUserData(session);
       return; // Succès, on sort de la fonction
     } catch (error) {
-      // Vérifier si c'est une erreur d'authentification
+      // Vérifier si c'est une erreur d'authentification ou de timeout
       const errorMessage =
         error instanceof Error ? error.message : String(error);
 
@@ -79,25 +97,40 @@ export const initAppData = async (): Promise<void> => {
         errorMessage.includes("Refresh Token Not Found") ||
         errorMessage.includes("JWT expired")
       ) {
-        console.log(
-          "Erreur d'authentification détectée, réinitialisation de l'état"
-        );
-        await resetAppState();
-        return; // Sortir directement de la fonction
+        // Tenter de rafraîchir le token
+        const refreshed = await refreshAuthToken();
+
+        if (refreshed) {
+          console.log(
+            "Token rafraîchi avec succès, reprise de l'initialisation"
+          );
+          continue; // Reprendre la boucle avec le nouveau token
+        } else {
+          console.log(
+            "Échec du rafraîchissement du token, réinitialisation de l'état"
+          );
+          await resetAppState();
+          return;
+        }
       }
 
-      console.error(
-        `Tentative ${retryCount + 1}/${MAX_RETRIES} échouée:`,
-        error
-      );
+      // Si c'est une erreur de timeout, ne pas afficher l'erreur complète
+      if (errorMessage === NETWORK_TIMEOUT_ERROR) {
+        console.log("Délai d'attente réseau dépassé, nouvelle tentative...");
+      } else {
+        console.error(
+          `Tentative ${retryCount + 1}/${MAX_RETRIES} échouée:`,
+          error
+        );
+      }
+
       retryCount++;
 
       if (retryCount < MAX_RETRIES) {
         await wait(RETRY_DELAY);
       } else {
         console.error(
-          "Erreur lors de l'initialisation de l'app après plusieurs tentatives:",
-          error
+          "Erreur lors de l'initialisation de l'app après plusieurs tentatives"
         );
         // Réinitialiser les états en cas d'échec final
         await resetAppState();
@@ -117,8 +150,12 @@ export const loadUserData = async (session: Session): Promise<void> => {
       const userId = session.user.id;
       const email = session.user.email || "";
 
-      // Créer ou récupérer l'utilisateur
-      const user = await createOrUpdateUser(userId, email);
+      // Créer ou récupérer l'utilisateur avec timeout
+      const user = await withTimeout(
+        createOrUpdateUser(userId, email),
+        API_TIMEOUT,
+        NETWORK_TIMEOUT_ERROR
+      );
 
       if (user) {
         // Mettre à jour l'état utilisateur
@@ -137,19 +174,30 @@ export const loadUserData = async (session: Session): Promise<void> => {
       }
       return; // Succès, on sort de la fonction
     } catch (error) {
-      console.error(
-        `Tentative ${retryCount + 1}/${MAX_RETRIES} échouée:`,
-        error
-      );
+      // Si c'est une erreur de timeout, ne pas afficher l'erreur complète
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (errorMessage === NETWORK_TIMEOUT_ERROR) {
+        console.log(
+          "Délai d'attente lors du chargement des données utilisateur, nouvelle tentative..."
+        );
+      } else {
+        console.error(
+          `Tentative ${retryCount + 1}/${MAX_RETRIES} échouée:`,
+          error
+        );
+      }
+
       retryCount++;
 
       if (retryCount < MAX_RETRIES) {
         await wait(RETRY_DELAY);
       } else {
         console.error(
-          "Erreur lors du chargement des données utilisateur après plusieurs tentatives:",
-          error
+          "Erreur lors du chargement des données utilisateur après plusieurs tentatives"
         );
+        // En cas d'échec persistant, marquer l'utilisateur comme déconnecté
+        await resetAppState();
       }
     }
   }
@@ -199,8 +247,17 @@ const loadFavoriteRecipes = async (favoriteIds: string[]): Promise<void> => {
 export const setupAuthStateListener = (): (() => void) => {
   const {
     data: { subscription },
-  } = supabase.auth.onAuthStateChange(async (_event, session) => {
-    if (session) {
+  } = supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log(`Événement d'authentification détecté: ${event}`);
+
+    if (event === "TOKEN_REFRESHED") {
+      console.log("Token rafraîchi avec succès");
+
+      if (session) {
+        // Recharger les données utilisateur avec le nouveau token
+        await loadUserData(session);
+      }
+    } else if (session) {
       // Utilisateur connecté
       await loadUserData(session);
     } else {
