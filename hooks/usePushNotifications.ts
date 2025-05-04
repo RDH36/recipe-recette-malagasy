@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import Constants from "expo-constants";
 
+import { saveExpoPushToken } from "@/services/pushNotificationService";
 import { Platform } from "react-native";
 
 function handleRegistrationError(errorMessage: string) {
@@ -47,7 +48,8 @@ async function registerForPushNotificationsAsync() {
           projectId,
         })
       ).data;
-      console.log(pushTokenString);
+      const deviceName = Device.brand;
+      await saveExpoPushToken({ expoPushToken: pushTokenString, deviceName });
       return pushTokenString;
     } catch (e: unknown) {
       handleRegistrationError(`${e}`);

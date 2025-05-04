@@ -4,9 +4,7 @@ import { supabase } from "@/config/supabase";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { initAppData, setupAuthStateListener } from "@/services/appInitService";
-import { saveExpoPushToken } from "@/services/pushNotificationService";
 import { refreshAuthToken } from "@/services/tokenService";
-import * as Device from "expo-device";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -192,11 +190,7 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    const deviceName = Device.brand;
-    const saveToken = async () => {
-      await saveExpoPushToken({ expoPushToken, deviceName });
-    };
-    saveToken();
+    console.log(expoPushToken);
   }, []);
 
   if (!isReady) {

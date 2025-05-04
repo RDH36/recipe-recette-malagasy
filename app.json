@@ -11,9 +11,9 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accéder à votre galerie pour sauvegarder les images de recettes."
-      },
-      "bundleIdentifier": "com.rdh36.reciperecettemalagasy"
+        "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accéder à votre galerie pour sauvegarder les images de recettes.",
+        "NSUserTrackingUsageDescription": "Cette app utilise les notifications pour vous alerter des nouvelles recettes et événements."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,6 +21,7 @@
         "backgroundColor": "#FF8050"
       },
       "permissions": [
+        "NOTIFICATIONS",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "android.permission.READ_EXTERNAL_STORAGE",
