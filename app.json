@@ -34,7 +34,7 @@
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "notification": {
-        "icon": "./assets/icons/adaptive-icon.png",
+        "icon": "./assets/icons/notification.png",
         "color": "#FF8050"
       },
       "googleServicesFile": "./google-services.json",
@@ -47,21 +47,12 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/icons/adaptive-icon.png",
+          "icon": "./assets/icons/notification.png",
           "color": "#ffffff",
           "enableBackgroundRemoteNotifications": false
         }
       ],
-      "@react-native-google-signin/google-signin",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/icons/adaptive-icon.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#ffffff",
-          "imageWidth": 200
-        }
-      ]
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
