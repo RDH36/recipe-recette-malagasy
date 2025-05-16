@@ -1,14 +1,14 @@
-import React, { useEffect } from "react"
-import { View, Animated, Easing, StyleSheet } from "react-native"
-import { LinearGradient } from "expo-linear-gradient"
-import { UtensilsCrossed } from "lucide-react-native"
-import { Text } from "expo-dynamic-fonts"
+import { Text } from "expo-dynamic-fonts";
+import { LinearGradient } from "expo-linear-gradient";
+import { UtensilsCrossed } from "lucide-react-native";
+import { useEffect } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 
 export default function SplashScreenAnimated() {
   // Animation pour le rebond
-  const bounceAnim = new Animated.Value(0)
+  const bounceAnim = new Animated.Value(0);
   // Animation pour les points de chargement
-  const dotsAnim = new Animated.Value(0)
+  const dotsAnim = new Animated.Value(0);
 
   useEffect(() => {
     // Animation de rebond
@@ -25,7 +25,7 @@ export default function SplashScreenAnimated() {
         useNativeDriver: true,
         easing: Easing.bounce,
       }),
-    ])
+    ]);
 
     // Animation des points
     const dots = Animated.sequence([
@@ -41,21 +41,21 @@ export default function SplashScreenAnimated() {
         useNativeDriver: true,
         easing: Easing.linear,
       }),
-    ])
+    ]);
 
     Animated.loop(bounce, {
       iterations: -1,
-    }).start()
+    }).start();
 
     Animated.loop(dots, {
       iterations: -1,
-    }).start()
-  }, [])
+    }).start();
+  }, []);
 
   const dotsOpacity = dotsAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [0.3, 1, 0.3],
-  })
+  });
 
   return (
     <LinearGradient
@@ -94,11 +94,11 @@ export default function SplashScreenAnimated() {
         </View>
       </View>
     </LinearGradient>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   logo: {
     fontSize: 32,
   },
-})
+});

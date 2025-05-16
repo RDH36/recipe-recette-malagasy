@@ -24,7 +24,7 @@ const PremiumScreen = () => {
     useStore();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubscribe = async (plan: "premium" | "lifetime") => {
+  const handleSubscribe = async (plan: "monthly" | "yearly" | "lifetime") => {
     if (isPremium) {
       router.push("/search/Search");
       return;
@@ -38,41 +38,12 @@ const PremiumScreen = () => {
       );
       return;
     }
-
-    try {
-      let success = false;
-
-      if (plan === "lifetime") {
-        // Abonnement à vie
-        success = await updateLifetimeStatus(user.id, true);
-        if (success) {
-          setIsLifetime(true);
-          setIsPremium(true); // L'utilisateur devient également premium avec un abonnement à vie
-        }
-      } else {
-        // Abonnement premium mensuel
-        success = await updatePremiumStatus(user.id, true);
-        if (success) {
-          setIsPremium(true);
-        }
-      }
-
-      if (success) {
-        console.log(`Abonnement réussi au forfait ${plan}`);
-        router.push("/premium/congratulation");
-      } else {
-        Alert.alert(
-          "Erreur",
-          "Une erreur s'est produite lors de l'activation de votre abonnement. Veuillez réessayer."
-        );
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'abonnement:", error);
-      Alert.alert(
-        "Erreur",
-        "Une erreur s'est produite. Veuillez réessayer ultérieurement."
-      );
-    }
+    
+    // Rediriger vers la page de paiement avec le type d'abonnement
+    router.push({
+      pathname: "/premium/payment" as any,
+      params: { type: plan }
+    });
   };
 
   const handleCancelSubscription = async () => {
@@ -189,6 +160,7 @@ const PremiumScreen = () => {
             <PricingCard
               title="Premium Mensuel"
               price="4,99"
+              priceUnit="€/mois"
               features={[
                 "Accès à TOUTES les recettes authentiques",
                 "Collections de recettes régionales",
@@ -199,7 +171,25 @@ const PremiumScreen = () => {
               buttonText={
                 isPremium ? "Vous êtes déjà Premium" : "Obtenir Premium"
               }
-              onPress={() => handleSubscribe("premium")}
+              onPress={() => handleSubscribe("monthly")}
+            />
+
+            <PricingCard
+              title="Premium Annuel"
+              price="19,99"
+              priceUnit="€/an"
+              features={[
+                "Accès à TOUTES les recettes authentiques",
+                "Collections de recettes régionales",
+                "Contexte culturel et historique",
+                "Sans publicités",
+                "Guides de substitution d'ingrédients",
+                "Économisez plus de 65% par rapport au mensuel"
+              ]}
+              buttonText={
+                isPremium ? "Vous êtes déjà Premium" : "Obtenir Premium"
+              }
+              onPress={() => handleSubscribe("yearly")}
               isPopular
             />
 
@@ -212,7 +202,7 @@ const PremiumScreen = () => {
             <View className="bg-primary p-6 rounded-2xl shadow-lg">
               <View className="absolute -top-3 right-4 bg-white px-4 py-1 rounded-full">
                 <Text className="text-xs font-bold text-primary">
-                  MEILLEURE OFFRE
+                  PROMO LIMITÉE
                 </Text>
               </View>
 
@@ -221,7 +211,7 @@ const PremiumScreen = () => {
               </Text>
 
               <View className="flex-row items-baseline mb-6">
-                <Text className="text-4xl font-bold text-white">39,99</Text>
+                <Text className="text-4xl font-bold text-white">24,99</Text>
                 <Text className="ml-1 text-white/80">€</Text>
                 <Text className="ml-2 text-white/80 line-through text-sm">
                   99,99€
@@ -288,7 +278,7 @@ const PremiumScreen = () => {
                   <X size={14} color="#7D7D7D" className="mr-2" />
                 )}
                 <Text className="text-text-disabled">
-                  Annuler mon abonnement mensuel
+                  Annuler mon abonnement
                 </Text>
               </TouchableOpacity>
               <Text className="text-center text-text-disabled text-xs mt-1">

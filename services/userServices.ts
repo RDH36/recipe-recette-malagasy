@@ -73,16 +73,22 @@ export const createOrUpdateUser = async (
  * Met à jour le statut premium d'un utilisateur
  * @param userId ID de l'utilisateur
  * @param isPremium Nouveau statut premium
+ * @param subscriptionType Type d'abonnement ('monthly' ou 'yearly')
  * @returns Succès de l'opération
  */
 export const updatePremiumStatus = async (
   userId: string,
-  isPremium: boolean
+  isPremium: boolean,
+  subscriptionType: 'monthly' | 'yearly' = 'monthly'
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from("users")
-      .update({ isPremium, updated_at: new Date().toISOString() })
+      .update({ 
+        isPremium, 
+        subscriptionType: isPremium ? subscriptionType : null,
+        updated_at: new Date().toISOString() 
+      })
       .eq("id", userId);
 
     return !error;

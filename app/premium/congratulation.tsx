@@ -80,7 +80,7 @@ export default function PremiumCongratulationScreen() {
       <StatusBar barStyle="dark-content" />
       <ScrollView className="flex-1 p-4">
         <View className="items-center justify-center">
-          <Animated.View style={badgeStyle} className="items-center my-10">
+          <Animated.View style={[badgeStyle, { alignItems: 'center', marginVertical: 40 }]}>
             <View className="w-32 h-32 rounded-full bg-primary/5 items-center justify-center">
               <LinearGradient
                 colors={
@@ -98,8 +98,7 @@ export default function PremiumCongratulationScreen() {
           </Animated.View>
 
           <Animated.View
-            style={contentStyle}
-            className="w-full items-center px-4"
+            style={[contentStyle, { width: '100%', alignItems: 'center', paddingHorizontal: 16 }]}
           >
             <Text className="text-3xl font-bold text-text-primary text-center mb-4">
               {title}

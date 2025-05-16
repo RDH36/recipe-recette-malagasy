@@ -10,6 +10,7 @@ interface PricingCardProps {
   onPress: () => void;
   isPopular?: boolean;
   isPrimary?: boolean;
+  priceUnit?: string;
 }
 
 const PricingCard: React.FC<PricingCardProps> = ({
@@ -20,6 +21,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   onPress,
   isPopular,
   isPrimary,
+  priceUnit = "€/mois",
 }) => {
   return (
     <View
@@ -54,7 +56,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
             isPrimary ? "text-white/80" : "text-text-disabled"
           }`}
         >
-          €/mois
+          {priceUnit}
         </Text>
       </View>
 

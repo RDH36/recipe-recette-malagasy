@@ -8,11 +8,6 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -45,6 +40,14 @@
       "expo-router",
       "expo-media-library",
       [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon.png",
+          "imageResizeMode": "cover",
+          "backgroundColor": "#FF7A29"
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/icons/notification.png",
@@ -52,7 +55,14 @@
           "enableBackgroundRemoteNotifications": false
         }
       ],
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.rdh36.reciperecettemalagasy",
+          "enableGooglePay": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
