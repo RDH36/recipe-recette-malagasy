@@ -1,4 +1,6 @@
 import RecipeDetail from "@/components/RecipeDetail/RecipeDetail"
+import { useAdMob } from "@/contexts/AdMobContext"
+import { showInterstitialAd } from "@/services/adMobService"
 import { getRecipeById } from "@/services/recipeService"
 import { Recipe } from "@/Types/RecipeType"
 import { router, useLocalSearchParams } from "expo-router"
@@ -16,6 +18,8 @@ export default function RecipeDetails() {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { showAds } = useAdMob()
+  const [adShown, setAdShown] = useState(false)
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -34,6 +38,22 @@ export default function RecipeDetails() {
 
     fetchRecipe()
   }, [id])
+  
+  // Afficher une publicité interstitielle lorsque l'écran est chargé
+  // Mais seulement pour les utilisateurs non premium et une fois par session
+  useEffect(() => {
+    const showAd = async () => {
+      if (showAds && !loading && !adShown && recipe) {
+        // Attendre un court délai pour que l'utilisateur puisse voir la recette d'abord
+        setTimeout(async () => {
+          await showInterstitialAd()
+          setAdShown(true)
+        }, 2000) // Délai de 2 secondes
+      }
+    }
+    
+    showAd()
+  }, [showAds, loading, adShown, recipe])
 
   if (loading) {
     return (
@@ -77,8 +97,10 @@ export default function RecipeDetails() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-neutral-white">
-      <RecipeDetail recipe={recipe} />
-    </ScrollView>
+    <View className="flex-1 bg-neutral-white">
+      <ScrollView className="flex-1">
+        <RecipeDetail recipe={recipe} />
+      </ScrollView>
+    </View>
   )
 }

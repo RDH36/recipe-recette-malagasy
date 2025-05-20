@@ -1,8 +1,10 @@
 import type { Recipe } from "@/Types/RecipeType";
+import { AdBanner } from "@/components/Ads";
 import Banner from "@/components/Banner/Banner";
 import CategoryView from "@/components/CategoryView/CategoryView";
 import Header from "@/components/Header/Header";
 import PremiumSection from "@/components/PremiumCTA/PremiumSection";
+import { useAdMob } from "@/contexts/AdMobContext";
 import { getRecipes } from "@/services/recipeService";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -17,6 +19,7 @@ export default function Index() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { showAds } = useAdMob();
 
   const fetchRecipes = async () => {
     try {
@@ -85,7 +88,15 @@ export default function Index() {
           <View className="mt-6 px-4 mb-4">
             <PremiumSection />
           </View>
+          
+          {/* Espace pour éviter que la bannière ne cache du contenu */}
+          {showAds && <View style={{ height: 50 }} />}
         </ScrollView>
+        
+        {/* Bannière publicitaire en bas de l'écran */}
+        <View style={{ position: 'absolute', bottom: 0, width: '100%' }}>
+          <AdBanner />
+        </View>
       </View>
     </View>
   );

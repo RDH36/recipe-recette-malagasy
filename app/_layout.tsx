@@ -1,6 +1,7 @@
 import NetworkStatus from "@/components/NetworkStatus/NetworkStatus";
 import SplashScreenAnimated from "@/components/SplashScreen/SplashScreen";
 import { supabase } from "@/config/supabase";
+import { AdMobProvider } from "@/contexts/AdMobContext";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { initAppData, setupAuthStateListener } from "@/services/appInitService";
@@ -201,27 +202,29 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <NetworkStatus isConnected={!!(isConnected && isInternetReachable)} />
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="recipe/[id]/cooking"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="recipe/[id]/congratulations"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen name="premium/premium" options={{ headerShown: false }} />
-        <Stack.Screen name="premium/payment" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="premium/congratulation"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen name="error/network" options={{ headerShown: false }} />
-      </Stack>
-    </View>
+    <AdMobProvider>
+      <View style={{ flex: 1 }}>
+        <NetworkStatus isConnected={!!(isConnected && isInternetReachable)} />
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="recipe/[id]/cooking"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="recipe/[id]/congratulations"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="premium/premium" options={{ headerShown: false }} />
+          <Stack.Screen name="premium/payment" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="premium/congratulation"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen name="error/network" options={{ headerShown: false }} />
+        </Stack>
+      </View>
+    </AdMobProvider>
   );
 }
