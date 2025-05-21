@@ -5,7 +5,10 @@ import CategoryView from "@/components/CategoryView/CategoryView";
 import Header from "@/components/Header/Header";
 import PremiumSection from "@/components/PremiumCTA/PremiumSection";
 import { useAdMob } from "@/contexts/AdMobContext";
-import { getRecipes } from "@/services/recipeService";
+import {
+  getNotPopularRecipes,
+  getPopularRecipes,
+} from "@/services/recipeService";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -16,15 +19,18 @@ import {
 } from "react-native";
 
 export default function Index() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [popularRecipes, setPopularRecipes] = useState<Recipe[]>([]);
+  const [notPopularRecipes, setNotPopularRecipes] = useState<Recipe[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const { showAds } = useAdMob();
 
   const fetchRecipes = async () => {
     try {
-      const data = await getRecipes();
-      setRecipes(data);
+      const popularData = await getPopularRecipes();
+      const notPopularData = await getNotPopularRecipes();
+      setPopularRecipes(popularData);
+      setNotPopularRecipes(notPopularData);
     } catch (error) {
       console.error("Error fetching recipes:", error);
     } finally {
@@ -75,26 +81,24 @@ export default function Index() {
         >
           <Banner />
           <CategoryView
-            recipes={recipes}
+            recipes={popularRecipes}
             title="Populaires"
-            allRecipes={recipes}
+            allRecipes={popularRecipes}
           />
           <CategoryView
-            recipes={recipes}
+            recipes={notPopularRecipes}
             title="Découvertes"
-            allRecipes={recipes}
+            allRecipes={notPopularRecipes}
           />
 
           <View className="mt-6 px-4 mb-4">
             <PremiumSection />
           </View>
-          
-          {/* Espace pour éviter que la bannière ne cache du contenu */}
+
           {showAds && <View style={{ height: 50 }} />}
         </ScrollView>
-        
-        {/* Bannière publicitaire en bas de l'écran */}
-        <View style={{ position: 'absolute', bottom: 0, width: '100%' }}>
+
+        <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
           <AdBanner />
         </View>
       </View>

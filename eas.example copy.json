@@ -9,17 +9,36 @@
       "distribution": "internal",
       "android": {
         "gradleCommand": ":app:assembleDebug"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "",
+        "EXPO_PUBLIC_STRIPE_SECRET_KEY": "",
+        "EXPO_PUBLIC_STRIPE_WEBHOOK_SECRET": "",
+        "EXPO_PUBLIC_AD_UNIT_IDS_INTERSTITIAL": "",
+        "EXPO_PUBLIC_AD_UNIT_IDS_REWARDED": "",
+        "EXPO_PUBLIC_AD_UNIT_IDS_BANNER": "",
+        "EXPO_PUBLIC_ENV": "development"
       }
     },
     "preview": {
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
-        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": ""
-      },
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "",
+        "EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY": "",
+        "EXPO_PUBLIC_STRIPE_SECRET_KEY": "",
+        "EXPO_PUBLIC_STRIPE_WEBHOOK_SECRET": "",
+        "EXPO_PUBLIC_AD_UNIT_IDS_INTERSTITIAL": "",
+        "EXPO_PUBLIC_AD_UNIT_IDS_REWARDED": "",
+        "EXPO_PUBLIC_AD_UNIT_IDS_BANNER": "",
+        "EXPO_PUBLIC_ENV": "development"
       }
     },
     "production": {}

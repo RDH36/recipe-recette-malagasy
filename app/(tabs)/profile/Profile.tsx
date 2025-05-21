@@ -1,12 +1,20 @@
-import Auth from "@/components/auth/Auth";
 import { AdRewardedButton } from "@/components/Ads";
+import Auth from "@/components/auth/Auth";
 import { supabase } from "@/config/supabase";
 import { useAdMob } from "@/contexts/AdMobContext";
 import { useStore } from "@/store/useStore";
 import { Session } from "@supabase/supabase-js";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { AlertTriangle, CreditCard, Crown, Diamond, Heart, LogOut, Play } from "lucide-react-native";
+import {
+  AlertTriangle,
+  CreditCard,
+  Crown,
+  Diamond,
+  Heart,
+  LogOut,
+  Play,
+} from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -147,28 +155,28 @@ export default function Profile() {
                 <Text className="text-white font-semibold">Upgrade</Text>
               </TouchableOpacity>
             </View>
-            
-            {/* Option pour débloquer Premium temporairement via une publicité */}
+
             {showAds && !tempPremium && (
               <View className="mt-4 pt-4 border-t border-neutral-200">
                 <View className="flex-row items-center mb-2">
                   <Play size={16} color="#FF8050" />
-                  <Text className="ml-2 text-text-primary font-medium">Essayer Premium gratuitement</Text>
+                  <Text className="ml-2 text-text-primary font-medium">
+                    Essayer Premium gratuitement
+                  </Text>
                 </View>
                 <Text className="text-text-secondary text-xs mb-3">
-                  Regardez une publicité pour débloquer 30 minutes d'accès Premium
+                  Regardez une publicité pour débloquer 30 minutes d'accès
+                  Premium
                 </Text>
                 <AdRewardedButton
                   buttonText="Regarder une publicité"
-                  style={{ backgroundColor: '#4CAF50' }}
+                  style={{ backgroundColor: "#4CAF50" }}
                   onRewarded={(rewarded) => {
                     if (rewarded) {
-                      // Accorder 30 minutes d'accès premium temporaire
                       setTempPremium(true);
                       setIsPremium(true);
-                      setTempPremiumTimeLeft(30 * 60); // 30 minutes en secondes
-                      
-                      // Démarrer un compte à rebours
+                      setTempPremiumTimeLeft(30 * 60);
+
                       const interval = setInterval(() => {
                         setTempPremiumTimeLeft((prev) => {
                           if (prev <= 1) {
@@ -176,8 +184,8 @@ export default function Profile() {
                             setTempPremium(false);
                             setIsPremium(false);
                             Alert.alert(
-                              'Accès Premium expiré',
-                              'Votre accès Premium temporaire a expiré. Regardez une autre publicité ou abonnez-vous pour continuer à profiter des fonctionnalités Premium.'
+                              "Accès Premium expiré",
+                              "Votre accès Premium temporaire a expiré. Regardez une autre publicité ou abonnez-vous pour continuer à profiter des fonctionnalités Premium."
                             );
                             return 0;
                           }
@@ -189,17 +197,19 @@ export default function Profile() {
                 />
               </View>
             )}
-            
-            {/* Afficher le temps restant si l'utilisateur a un accès temporaire */}
+
             {tempPremium && (
               <View className="mt-4 pt-4 border-t border-neutral-200">
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center">
                     <AlertTriangle size={16} color="#FF8050" />
-                    <Text className="ml-2 text-text-primary font-medium">Accès temporaire</Text>
+                    <Text className="ml-2 text-text-primary font-medium">
+                      Accès temporaire
+                    </Text>
                   </View>
                   <Text className="text-primary font-bold">
-                    {Math.floor(tempPremiumTimeLeft / 60)}:{String(tempPremiumTimeLeft % 60).padStart(2, '0')}
+                    {Math.floor(tempPremiumTimeLeft / 60)}:
+                    {String(tempPremiumTimeLeft % 60).padStart(2, "0")}
                   </Text>
                 </View>
                 <Text className="text-text-secondary text-xs mt-1">

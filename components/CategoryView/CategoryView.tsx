@@ -36,7 +36,7 @@ export default function CategoryView({
         showsHorizontalScrollIndicator={false}
         className="pl-4"
       >
-        {recipes.slice(0, 5).map((recipe) => (
+        {recipes.slice(0, 4).map((recipe) => (
           <RecipeCard
             key={recipe.id}
             recipe={recipe}

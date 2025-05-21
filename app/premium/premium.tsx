@@ -1,9 +1,5 @@
 import PricingCard from "@/components/PremiumCTA/PricingCard";
-import {
-  cancelPremiumSubscription,
-  updateLifetimeStatus,
-  updatePremiumStatus,
-} from "@/services/userServices";
+import { cancelPremiumSubscription } from "@/services/userServices";
 import { useStore } from "@/store/useStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -34,15 +30,14 @@ const PremiumScreen = () => {
       Alert.alert(
         "Connexion requise",
         "Vous devez être connecté pour vous abonner à Premium.",
-        [{ text: "OK", onPress: () => router.push("/(tabs)") }]
+        [{ text: "OK", onPress: () => router.push("/(tabs)/profile/Profile") }]
       );
       return;
     }
-    
-    // Rediriger vers la page de paiement avec le type d'abonnement
+
     router.push({
       pathname: "/premium/payment" as any,
-      params: { type: plan }
+      params: { type: plan },
     });
   };
 
@@ -184,7 +179,7 @@ const PremiumScreen = () => {
                 "Contexte culturel et historique",
                 "Sans publicités",
                 "Guides de substitution d'ingrédients",
-                "Économisez plus de 65% par rapport au mensuel"
+                "Économisez plus de 65% par rapport au mensuel",
               ]}
               buttonText={
                 isPremium ? "Vous êtes déjà Premium" : "Obtenir Premium"

@@ -1,12 +1,12 @@
-import { useStore } from "@/store/useStore";
 import {
   SubscriptionType,
   getSubscriptionPrice,
 } from "@/services/stripeServices";
+import { useStore } from "@/store/useStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, CreditCard } from "lucide-react-native";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -24,11 +24,11 @@ export default function PaymentScreen() {
   const amount = getSubscriptionPrice(subscriptionType);
   const { user, setIsPremium, setIsLifetime } = useStore();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // États pour les champs de la carte
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvc, setCvc] = useState("");
 
   const getSubscriptionTitle = () => {
     switch (subscriptionType) {
@@ -42,59 +42,60 @@ export default function PaymentScreen() {
         return "Abonnement";
     }
   };
-  
-  // Formater le numéro de carte pendant la saisie
+
   const formatCardNumber = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
+    const cleaned = text.replace(/\D/g, "");
     const groups = [];
-    
+
     for (let i = 0; i < cleaned.length; i += 4) {
       groups.push(cleaned.substring(i, i + 4));
     }
-    
-    return groups.join(' ').trim().substring(0, 19);
+
+    return groups.join(" ").trim().substring(0, 19);
   };
-  
-  // Formater la date d'expiration pendant la saisie
+
   const formatExpiry = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    
+    const cleaned = text.replace(/\D/g, "");
+
     if (cleaned.length >= 3) {
       return `${cleaned.substring(0, 2)}/${cleaned.substring(2, 4)}`;
     } else if (cleaned.length === 2) {
       return `${cleaned}/`;
     }
-    
+
     return cleaned;
   };
-  
-  // Simuler un paiement
+
   const handlePayment = () => {
     if (!user) {
-      Alert.alert('Erreur', 'Vous devez être connecté pour effectuer un paiement');
+      Alert.alert(
+        "Erreur",
+        "Vous devez être connecté pour effectuer un paiement"
+      );
       return;
     }
-    
+
     if (cardNumber.length < 19 || expiry.length < 5 || cvc.length < 3) {
-      Alert.alert('Erreur', 'Veuillez remplir correctement tous les champs de la carte');
+      Alert.alert(
+        "Erreur",
+        "Veuillez remplir correctement tous les champs de la carte"
+      );
       return;
     }
-    
+
     setIsLoading(true);
-    
-    // Simuler un délai de traitement
+
     setTimeout(() => {
       setIsLoading(false);
-      
-      // Mettre à jour le statut premium
+
       setIsPremium(true);
-      
-      if (subscriptionType === 'lifetime') {
+
+      if (subscriptionType === "lifetime") {
         setIsLifetime(true);
+        setIsPremium(true);
       }
-      
-      // Rediriger vers la page de félicitations
-      router.push('/premium/congratulation');
+
+      router.push("/premium/congratulation");
     }, 2000);
   };
 
@@ -132,9 +133,13 @@ export default function PaymentScreen() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
       >
         <View className="mt-4 mb-6 p-4 bg-white rounded-xl shadow-sm">
-          <Text className="text-lg font-bold mb-2 text-center">Paiement sécurisé</Text>
-          <Text className="text-2xl font-bold text-primary text-center mb-6">{amount.toFixed(2)} €</Text>
-          
+          <Text className="text-lg font-bold mb-2 text-center">
+            Paiement sécurisé
+          </Text>
+          <Text className="text-2xl font-bold text-primary text-center mb-6">
+            {amount.toFixed(2)} €
+          </Text>
+
           <View className="mb-4">
             <Text className="text-sm text-gray-600 mb-1">Numéro de carte</Text>
             <View className="flex-row items-center border border-gray-300 rounded-lg px-3 py-2">
@@ -149,10 +154,12 @@ export default function PaymentScreen() {
               />
             </View>
           </View>
-          
+
           <View className="flex-row mb-6">
             <View className="flex-1 mr-2">
-              <Text className="text-sm text-gray-600 mb-1">Date d'expiration</Text>
+              <Text className="text-sm text-gray-600 mb-1">
+                Date d'expiration
+              </Text>
               <TextInput
                 className="border border-gray-300 rounded-lg px-3 py-2 text-base"
                 placeholder="MM/YY"
@@ -175,30 +182,35 @@ export default function PaymentScreen() {
               />
             </View>
           </View>
-          
+
           <TouchableOpacity
-            className={`py-4 rounded-xl items-center ${isLoading ? 'bg-primary/50' : 'bg-primary'}`}
+            className={`py-4 rounded-xl items-center ${
+              isLoading ? "bg-primary/50" : "bg-primary"
+            }`}
             onPress={handlePayment}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text className="text-white font-semibold text-base">Payer maintenant</Text>
+              <Text className="text-white font-semibold text-base">
+                Payer maintenant
+              </Text>
             )}
           </TouchableOpacity>
-          
-          <TouchableOpacity className="py-3 items-center" onPress={() => router.back()}>
+
+          <TouchableOpacity
+            className="py-3 items-center"
+            onPress={() => router.back()}
+          >
             <Text className="text-gray-500 text-sm">Annuler</Text>
           </TouchableOpacity>
-          
+
           <View className="mt-4 items-center">
-            <Text className="text-gray-400 text-xs">
-              🔒 Paiement sécurisé
-            </Text>
+            <Text className="text-gray-400 text-xs">🔒 Paiement sécurisé</Text>
           </View>
         </View>
-        
+
         <View className="bg-white p-4 rounded-xl mb-4">
           <Text className="text-base font-bold mb-2 text-gray-800">
             Informations importantes
@@ -212,8 +224,8 @@ export default function PaymentScreen() {
           {subscriptionType === "yearly" && (
             <Text className="text-sm leading-5 text-gray-600">
               Votre abonnement annuel sera automatiquement renouvelé chaque
-              année. Vous bénéficiez d'une économie de plus de 65% par rapport
-              à l'abonnement mensuel.
+              année. Vous bénéficiez d'une économie de plus de 65% par rapport à
+              l'abonnement mensuel.
             </Text>
           )}
           {subscriptionType === "lifetime" && (

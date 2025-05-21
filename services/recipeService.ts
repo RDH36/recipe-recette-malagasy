@@ -56,6 +56,38 @@ export const getRecipes = async (): Promise<Recipe[]> => {
   return (data || []).map(mapSupabaseRecipeToAppRecipe);
 };
 
+export const getPopularRecipes = async (): Promise<Recipe[]> => {
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("*")
+    .eq("category", "populaire")
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  if (error) {
+    console.error("Error fetching popular recipes:", error);
+    throw error;
+  }
+
+  return (data || []).map(mapSupabaseRecipeToAppRecipe);
+};
+
+export const getNotPopularRecipes = async (): Promise<Recipe[]> => {
+  const { data, error } = await supabase
+    .from("recipes")
+    .select("*")
+    .not("category", "eq", "populaire")
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  if (error) {
+    console.error("Error fetching not popular recipes:", error);
+    throw error;
+  }
+
+  return (data || []).map(mapSupabaseRecipeToAppRecipe);
+};
+
 export const getRecipeById = async (id: string): Promise<Recipe | null> => {
   const { data, error } = await supabase
     .from("recipes")
