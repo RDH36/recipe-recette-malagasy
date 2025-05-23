@@ -16,40 +16,54 @@ const isDevelopment = process.env.EXPO_PUBLIC_ENV === "development";
 
 export const adUnitIds = {
   banner: isDevelopment
-    ? TestIds.BANNER!
-    : process.env.EXPO_PUBLIC_AD_UNIT_IDS_BANNER!,
+    ? TestIds.BANNER
+    : process.env.EXPO_PUBLIC_AD_UNIT_IDS_BANNER || TestIds.BANNER,
   interstitial: isDevelopment
-    ? process.env.EXPO_PUBLIC_AD_UNIT_IDS_INTERSTITIAL!
-    : TestIds.INTERSTITIAL,
+    ? TestIds.INTERSTITIAL
+    : process.env.EXPO_PUBLIC_AD_UNIT_IDS_INTERSTITIAL || TestIds.INTERSTITIAL,
   rewarded: isDevelopment
-    ? process.env.EXPO_PUBLIC_AD_UNIT_IDS_REWARDED!
-    : TestIds.REWARDED,
+    ? TestIds.REWARDED
+    : process.env.EXPO_PUBLIC_AD_UNIT_IDS_REWARDED || TestIds.REWARDED,
 };
 
 export const initializeAdMob = async () => {
-  await MobileAds().initialize();
-  if (!isDevelopment) {
+  try {
+    console.log('Initializing AdMob...');
+    await MobileAds().initialize();
+    console.log('MobileAds initialized');
+    
+    // Toujours demander le consentement en preview build
     const consentInfo = await AdsConsent.requestInfoUpdate({
       debugGeography: AdsConsentDebugGeography.EEA,
       testDeviceIdentifiers: ["EMULATOR"],
     });
+    console.log('Consent info:', consentInfo);
 
     if (
       consentInfo.isConsentFormAvailable &&
       consentInfo.status === AdsConsentStatus.REQUIRED
     ) {
       await AdsConsent.showForm();
+      console.log('Consent form shown');
     }
+
+    await MobileAds().setRequestConfiguration({
+      maxAdContentRating: MaxAdContentRating.PG,
+      tagForChildDirectedTreatment: false,
+      tagForUnderAgeOfConsent: false,
+      testDeviceIdentifiers: ["EMULATOR"],
+    });
+    console.log('AdMob configuration set');
+    
+    // Log les IDs utilisés
+    console.log('Using ad unit IDs:', adUnitIds);
+    
+    return true;
+  } catch (error) {
+    console.error('Error initializing AdMob:', error);
+    // Retourner true quand même pour ne pas bloquer l'affichage des publicités
+    return true;
   }
-
-  await MobileAds().setRequestConfiguration({
-    maxAdContentRating: MaxAdContentRating.PG,
-    tagForChildDirectedTreatment: false,
-    tagForUnderAgeOfConsent: false,
-    testDeviceIdentifiers: ["EMULATOR"],
-  });
-
-  return true;
 };
 
 export const adRequestOptions: RequestOptions = {

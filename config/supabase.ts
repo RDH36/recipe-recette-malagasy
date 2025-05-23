@@ -49,13 +49,7 @@ const checkExistingAuthSessions = async () => {
   }
 };
 
-// Vérifier les sessions d'authentification existantes au démarrage
 checkExistingAuthSessions();
-
-// Activer le mode debug en développement
-if (__DEV__) {
-  console.log("Mode debug activé pour Supabase Auth");
-}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -64,7 +58,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: false,
     flowType: "pkce",
-    debug: __DEV__, // Activer le débogage en développement
+    storageKey: "supabase-auth-token-v2",
   },
   global: {
     fetch: (url, options) => {
@@ -88,7 +82,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Configurer les événements d'authentification une fois le client créé
 if (__DEV__) {
   supabase.auth.onAuthStateChange((event, session) => {
     console.log(
@@ -98,19 +91,42 @@ if (__DEV__) {
   });
 }
 
-// Démarre le rafraîchissement automatique des tokens quand l'app est active
+let refreshInterval: NodeJS.Timeout | null = null;
+
 AppState.addEventListener("change", (state) => {
   if (state === "active") {
     supabase.auth.startAutoRefresh();
+
+    if (!refreshInterval) {
+      refreshInterval = setInterval(async () => {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) {
+          const expiresAt = new Date((data.session.expires_at || 0) * 1000);
+          const now = new Date();
+          const hoursUntilExpiry =
+            (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+          if (hoursUntilExpiry < 12) {
+            console.log(
+              "Session proche de l'expiration, rafraîchissement proactif"
+            );
+            await supabase.auth.refreshSession();
+          }
+        }
+      }, 10 * 60 * 1000); // 10 minutes
+    }
   } else {
     supabase.auth.stopAutoRefresh();
+
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+      refreshInterval = null;
+    }
   }
 });
 
-// Fonction utilitaire pour récupérer une session valide avec rafraîchissement
 export const getSessionWithRefresh = async () => {
   try {
-    // Récupérer la session actuelle
     const { data, error } = await supabase.auth.getSession();
 
     if (error) {
@@ -119,13 +135,28 @@ export const getSessionWithRefresh = async () => {
         error.message
       );
 
-      // Si le token est expiré, tenter un rafraîchissement manuel
       if (
         error.message.includes("JWT expired") ||
         error.message.includes("Invalid Refresh Token") ||
-        error.message.includes("Refresh Token Not Found")
+        error.message.includes("Refresh Token Not Found") ||
+        error.message.includes("token is expired")
       ) {
         console.log("Tentative de rafraîchissement manuel du token");
+
+        try {
+          const sessionData = await AsyncStorage.getItem(
+            "supabase-auth-token-v2"
+          );
+          if (sessionData) {
+            console.log("Données de session trouvées dans le stockage local");
+          }
+        } catch (storageError) {
+          console.error(
+            "Erreur lors de la vérification du stockage local:",
+            storageError
+          );
+        }
+
         const { data: refreshData, error: refreshError } =
           await supabase.auth.refreshSession();
 
@@ -134,7 +165,49 @@ export const getSessionWithRefresh = async () => {
             "Échec du rafraîchissement manuel:",
             refreshError.message
           );
+
+          try {
+            const lastSession = await AsyncStorage.getItem(
+              "last-valid-session"
+            );
+            if (lastSession) {
+              const parsedSession = JSON.parse(lastSession);
+              const sessionTime = new Date(
+                parsedSession.created_at || 0
+              ).getTime();
+              const now = new Date().getTime();
+              const daysSinceCreation =
+                (now - sessionTime) / (1000 * 60 * 60 * 24);
+
+              if (daysSinceCreation < 30) {
+                console.log(
+                  "Utilisation de la dernière session valide en cache"
+                );
+                return { session: parsedSession, error: null };
+              }
+            }
+          } catch (cacheError) {
+            console.error(
+              "Erreur lors de la récupération de la session en cache:",
+              cacheError
+            );
+          }
+
           return { session: null, error: refreshError };
+        }
+
+        if (refreshData.session) {
+          try {
+            await AsyncStorage.setItem(
+              "last-valid-session",
+              JSON.stringify(refreshData.session)
+            );
+          } catch (saveError) {
+            console.error(
+              "Erreur lors de la sauvegarde de la session:",
+              saveError
+            );
+          }
         }
 
         return { session: refreshData.session, error: null };
@@ -143,9 +216,37 @@ export const getSessionWithRefresh = async () => {
       return { session: null, error };
     }
 
+    if (data.session) {
+      try {
+        await AsyncStorage.setItem(
+          "last-valid-session",
+          JSON.stringify(data.session)
+        );
+      } catch (saveError) {
+        console.error("Erreur lors de la sauvegarde de la session:", saveError);
+      }
+    }
+
     return { session: data.session, error: null };
   } catch (error) {
     console.error("Erreur lors de la récupération de la session:", error);
+
+    try {
+      const lastSession = await AsyncStorage.getItem("last-valid-session");
+      if (lastSession) {
+        const parsedSession = JSON.parse(lastSession);
+        console.log(
+          "Utilisation de la dernière session valide en cache suite à une erreur"
+        );
+        return { session: parsedSession, error: null };
+      }
+    } catch (cacheError) {
+      console.error(
+        "Erreur lors de la récupération de la session en cache:",
+        cacheError
+      );
+    }
+
     return { session: null, error };
   }
 };

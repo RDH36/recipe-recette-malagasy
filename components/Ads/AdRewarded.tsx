@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useAdMob } from '@/contexts/AdMobContext';
-import { showRewardedAd } from '@/services/adMobService';
+import { showRewardedAd, adUnitIds } from '@/services/adMobService';
 
 type AdRewardedButtonProps = {
   onRewarded?: (rewarded: boolean) => void;
@@ -10,23 +10,43 @@ type AdRewardedButtonProps = {
   textStyle?: any;
 };
 
-export default function AdRewardedButton({ 
+export const AdRewardedButton = ({ 
   onRewarded, 
   buttonText = 'Obtenir une récompense', 
   style,
   textStyle
-}: AdRewardedButtonProps) {
+}: AdRewardedButtonProps) => {
   const { showAds, adsInitialized } = useAdMob();
   
+  useEffect(() => {
+    console.log('AdRewardedButton - showAds:', showAds, 'adsInitialized:', adsInitialized);
+    console.log('AdRewardedButton - unitId:', adUnitIds.rewarded);
+  }, [showAds, adsInitialized]);
+  
   // Ne pas afficher le bouton pour les utilisateurs premium
-  if (!showAds || !adsInitialized) {
+  if (!showAds) {
+    console.log('AdRewardedButton - Not showing because user is premium');
+    return null;
+  }
+  
+  if (!adsInitialized) {
+    console.log('AdRewardedButton - Not showing because AdMob is not initialized');
     return null;
   }
   
   const handlePress = async () => {
-    const { rewarded } = await showRewardedAd();
-    if (onRewarded) {
-      onRewarded(rewarded);
+    console.log('AdRewardedButton - Button pressed, showing rewarded ad...');
+    try {
+      const { rewarded } = await showRewardedAd();
+      console.log('AdRewardedButton - Ad result:', rewarded ? 'rewarded' : 'not rewarded');
+      if (onRewarded) {
+        onRewarded(rewarded);
+      }
+    } catch (error) {
+      console.error('AdRewardedButton - Error showing rewarded ad:', error);
+      if (onRewarded) {
+        onRewarded(false);
+      }
     }
   };
   
@@ -38,7 +58,9 @@ export default function AdRewardedButton({
       <Text style={[styles.text, textStyle]}>{buttonText}</Text>
     </TouchableOpacity>
   );
-}
+};
+
+export default AdRewardedButton;
 
 const styles = StyleSheet.create({
   button: {

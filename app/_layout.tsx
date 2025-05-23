@@ -3,23 +3,16 @@ import SplashScreenAnimated from "@/components/SplashScreen/SplashScreen";
 import { supabase } from "@/config/supabase";
 import { AdMobProvider } from "@/contexts/AdMobContext";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
-import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { initAppData, setupAuthStateListener } from "@/services/appInitService";
 import { refreshAuthToken } from "@/services/tokenService";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus, View } from "react-native";
 import "../global.css";
 
-// Empêcher le splash screen natif de se cacher automatiquement
-SplashScreen.preventAutoHideAsync().catch(() => {
-  /* ignore */
-});
-
 const MAX_INIT_TIME = 5000;
-const INACTIVE_THRESHOLD = 30000; // 30 secondes d'inactivité
+const INACTIVE_THRESHOLD = 30000;
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -32,7 +25,6 @@ export default function RootLayout() {
   const initializationInProgress = useRef<boolean>(false);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const { isConnected, isInternetReachable } = useNetworkStatus();
-  const { expoPushToken } = usePushNotifications();
 
   useEffect(() => {
     const cleanupInvalidSessions = async () => {
@@ -184,19 +176,6 @@ export default function RootLayout() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    console.log(expoPushToken);
-  }, []);
-
-  useEffect(() => {
-    if (isReady) {
-      // Masquer le splash screen natif d'Expo lorsque l'application est prête
-      SplashScreen.hideAsync().catch(() => {
-        /* ignore */
-      });
-    }
-  }, [isReady]);
-
   if (!isReady) {
     return <SplashScreenAnimated />;
   }
@@ -216,8 +195,14 @@ export default function RootLayout() {
             name="recipe/[id]/congratulations"
             options={{ headerShown: false }}
           />
-          <Stack.Screen name="premium/premium" options={{ headerShown: false }} />
-          <Stack.Screen name="premium/payment" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="premium/premium"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="premium/payment"
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="premium/congratulation"
             options={{ headerShown: false }}

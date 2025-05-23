@@ -10,6 +10,7 @@ import { Session } from "@supabase/supabase-js";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 seconde
 const API_TIMEOUT = 5000; // 5 secondes pour les appels API
+const SIGNOUT_TIMEOUT = 15000; // 15 secondes pour la déconnexion
 const NETWORK_TIMEOUT_ERROR = "Délai d'attente de la requête dépassé";
 
 /**
@@ -48,21 +49,29 @@ const withTimeout = <T>(
  * Réinitialise tous les états et effectue une déconnexion propre
  */
 const resetAppState = async (): Promise<void> => {
+  // Réinitialiser d'abord les états pour assurer une UI réactive
+  useStore.getState().setUser(null);
+  useStore.getState().setIsPremium(false);
+  useStore.getState().setIsLifetime(false);
+  useStore.getState().setFavorites([]);
+  
   try {
-    // Déconnexion explicite de Supabase pour nettoyer les tokens
-    await withTimeout(
-      supabase.auth.signOut(),
-      API_TIMEOUT,
-      "La déconnexion a pris trop de temps"
-    );
+    // Déconnexion avec un timeout plus long et en mode non-bloquant
+    const signOutPromise = supabase.auth.signOut();
+    
+    // Utiliser un timeout plus long spécifiquement pour la déconnexion
+    const timeoutPromise = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.log("Délai de déconnexion atteint, mais l'application continue");
+        resolve();
+      }, SIGNOUT_TIMEOUT);
+    });
+    
+    // Attendre la première promesse résolue (déconnexion ou timeout)
+    await Promise.race([signOutPromise, timeoutPromise]);
   } catch (error) {
-    console.error("Erreur lors de la déconnexion:", error);
-  } finally {
-    // Réinitialiser tous les états, quelle que soit l'issue de la déconnexion
-    useStore.getState().setUser(null);
-    useStore.getState().setIsPremium(false);
-    useStore.getState().setIsLifetime(false);
-    useStore.getState().setFavorites([]);
+    // Capturer l'erreur mais ne pas la propager
+    console.warn("Erreur non bloquante lors de la déconnexion:", error);
   }
 };
 

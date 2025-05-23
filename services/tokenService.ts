@@ -2,8 +2,10 @@ import { supabase } from "@/config/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Clés de stockage
-const AUTH_TOKEN_KEY = "supabase-auth-token";
+const AUTH_TOKEN_KEY = "supabase-auth-token-v2";
 const REFRESH_TOKEN_ATTEMPTED_KEY = "refresh-token-attempted";
+const LAST_VALID_SESSION_KEY = "last-valid-session";
+const SESSION_EXPIRY_BUFFER = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
 
 /**
  * Vérifie si un token existe et est valide
@@ -26,23 +28,26 @@ export const isTokenValid = async (): Promise<boolean> => {
 };
 
 /**
- * Rafraîchit le token d'authentification
+ * Rafraîchit le token d'authentification avec une stratégie robuste
  * @returns {Promise<boolean>} true si le token a été rafraîchi avec succès, false sinon
  */
 export const refreshAuthToken = async (): Promise<boolean> => {
   try {
+    console.log("Tentative de rafraîchissement du token d'authentification");
+    
     // Vérifier si nous avons déjà tenté de rafraîchir le token récemment
     const lastAttempt = await AsyncStorage.getItem(REFRESH_TOKEN_ATTEMPTED_KEY);
     const now = Date.now();
 
     if (lastAttempt) {
       const lastAttemptTime = parseInt(lastAttempt, 10);
-      // Éviter de tenter un rafraîchissement plus d'une fois par minute
-      if (now - lastAttemptTime < 60000) {
+      // Éviter de tenter un rafraîchissement plus d'une fois par 20 secondes
+      // Augmenté pour éviter les problèmes de déconnexion fréquente
+      if (now - lastAttemptTime < 20000) {
         console.log(
           "Tentative de rafraîchissement trop récente, attente nécessaire"
         );
-        return false;
+        return true; // Retourner true pour éviter des déconnexions inutiles
       }
     }
 
@@ -50,73 +55,150 @@ export const refreshAuthToken = async (): Promise<boolean> => {
     await AsyncStorage.setItem(REFRESH_TOKEN_ATTEMPTED_KEY, now.toString());
 
     // Vérifier d'abord si une session existe
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
-      console.log(
-        "Aucune session active trouvée, impossible de rafraîchir le token"
-      );
-      await clearAuthData(); // Nettoyer les données pour éviter des tentatives futures
-      return false;
-    }
-
-    // Tenter de rafraîchir explicitement le token
-    const { data, error } = await supabase.auth.refreshSession();
-
-    if (error) {
-      console.error("Échec du rafraîchissement du token:", error.message);
-
-      // Si l'erreur est liée à un token invalide/manquant, nettoyer la session
-      if (
-        error.message.includes("Invalid Refresh Token") ||
-        error.message.includes("Refresh Token Not Found") ||
-        error.message.includes("JWT expired") ||
-        error.message.includes("Auth session missing")
-      ) {
-        await clearAuthData();
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    // Gérer les erreurs de récupération de session de manière plus tolérante
+    if (sessionError) {
+      console.warn("Erreur lors de la récupération de la session:", sessionError.message);
+      
+      // Si l'erreur est liée à un problème réseau, on considère que le token pourrait être valide
+      if (sessionError.message.includes("network") || 
+          sessionError.message.includes("timeout") || 
+          sessionError.message.includes("connection")) {
+        console.log("Problème réseau détecté, on considère le token comme potentiellement valide");
+        return true;
       }
-
+    }
+    
+    // Si nous avons une session valide
+    if (sessionData?.session) {
+      // Vérifier si le token est sur le point d'expirer
+      const expiresAt = new Date((sessionData.session.expires_at || 0) * 1000).getTime();
+      const timeUntilExpiry = expiresAt - now;
+      
+      // Si le token expire bientôt ou est déjà expiré, le rafraîchir
+      if (timeUntilExpiry < SESSION_EXPIRY_BUFFER) {
+        console.log("Token proche de l'expiration, rafraîchissement...");
+        
+        // Sauvegarder la session actuelle comme sauvegarde
+        await AsyncStorage.setItem(LAST_VALID_SESSION_KEY, JSON.stringify(sessionData.session));
+        
+        // Tenter de rafraîchir explicitement le token avec gestion des erreurs améliorée
+        try {
+          const { data, error } = await supabase.auth.refreshSession();
+          
+          if (error) {
+            console.warn("\u00c9chec du rafraîchissement du token:", error.message);
+            
+            // Pour certaines erreurs, on peut considérer que la session est encore valide
+            if (error.message.includes("network") || 
+                error.message.includes("timeout") || 
+                error.message.includes("connection")) {
+              console.log("Erreur réseau lors du rafraîchissement, on garde la session actuelle");
+              return true;
+            }
+            
+            return false;
+          }
+          
+          console.log("Token rafraîchi avec succès");
+          return !!data.session;
+        } catch (refreshError) {
+          console.warn("Exception lors du rafraîchissement:", refreshError);
+          // En cas d'erreur inattendue, on considère que la session pourrait encore être valide
+          return true;
+        }
+      } else {
+        console.log("Token encore valide pour", Math.floor(timeUntilExpiry / (60 * 1000)), "minutes");
+        return true;
+      }
+    } else {
+      console.log("Aucune session active trouvée, tentative de récupération");
+      
+      // Essayer de récupérer la dernière session valide
+      const lastSessionStr = await AsyncStorage.getItem(LAST_VALID_SESSION_KEY);
+      if (lastSessionStr) {
+        try {
+          const lastSession = JSON.parse(lastSessionStr);
+          console.log("Dernière session valide trouvée, tentative de restauration");
+          
+          // Tenter de rafraîchir avec le refresh token de la dernière session
+          try {
+            const { data, error } = await supabase.auth.refreshSession();
+            
+            if (!error && data.session) {
+              console.log("Session restaurée avec succès");
+              return true;
+            }
+            
+            // Même en cas d'erreur, on peut décider de ne pas déconnecter l'utilisateur
+            // si l'erreur est liée au réseau
+            if (error && (error.message.includes("network") || 
+                         error.message.includes("timeout") || 
+                         error.message.includes("connection"))) {
+              console.log("Erreur réseau lors de la restauration, on garde l'utilisateur connecté");
+              return true;
+            }
+          } catch (e) {
+            console.warn("Exception lors de la restauration de session:", e);
+            // En cas d'erreur inattendue, on peut être plus tolérant
+            return true;
+          }
+        } catch (e) {
+          console.error("Erreur lors de la restauration de la session:", e);
+        }
+      }
+      
+      // Si nous n'avons pas pu récupérer une session valide
+      console.log("Impossible de récupérer une session valide");
       return false;
     }
-
-    console.log("Token rafraîchi avec succès");
-    return !!data.session;
   } catch (error) {
-    console.error("Erreur lors du rafraîchissement du token:", error);
-    // En cas d'erreur inattendue, nettoyer les données d'authentification
-    await clearAuthData();
-    return false;
+    console.warn("Erreur lors du rafraîchissement du token:", error);
+    // En cas d'erreur générale, on peut être plus tolérant pour éviter les déconnexions
+    return true;
   }
 };
 
 /**
  * Supprime toutes les données d'authentification
+ * @param {boolean} preserveLastSession - Si true, conserve la dernière session valide
  */
-export const clearAuthData = async (): Promise<void> => {
+export const clearAuthData = async (preserveLastSession: boolean = true): Promise<void> => {
   try {
+    // Sauvegarder la dernière session valide si demandé
+    let lastSessionData = null;
+    if (preserveLastSession) {
+      try {
+        lastSessionData = await AsyncStorage.getItem(LAST_VALID_SESSION_KEY);
+      } catch (e) {
+        console.error("Erreur lors de la récupération de la dernière session:", e);
+      }
+    }
+    
     // Nettoyer les données stockées dans AsyncStorage
     const keys = await AsyncStorage.getAllKeys();
     const authKeys = keys.filter(
       (key) =>
         key.startsWith("sb-") ||
         key === AUTH_TOKEN_KEY ||
-        key === REFRESH_TOKEN_ATTEMPTED_KEY
+        key === REFRESH_TOKEN_ATTEMPTED_KEY ||
+        (key === LAST_VALID_SESSION_KEY && !preserveLastSession)
     );
 
     if (authKeys.length > 0) {
-      console.log(
-        `Nettoyage de ${authKeys.length} clés d'authentification en cache`
-      );
       await AsyncStorage.multiRemove(authKeys);
+      console.log(`${authKeys.length} clés d'authentification supprimées`);
     }
 
-    // Tenter la déconnexion de Supabase (en cas d'échec, continuer)
-    try {
-      await supabase.auth.signOut({ scope: "local" });
-    } catch (error) {
-      console.log("Erreur lors de la déconnexion Supabase (ignorée):", error);
+    // Déconnexion de Supabase
+    await supabase.auth.signOut({ scope: 'local' }); // Déconnexion locale uniquement
+    
+    // Restaurer la dernière session valide si demandé
+    if (preserveLastSession && lastSessionData) {
+      await AsyncStorage.setItem(LAST_VALID_SESSION_KEY, lastSessionData);
+      console.log("Dernière session valide préservée");
     }
-
-    console.log("Données d'authentification effacées avec succès");
   } catch (error) {
     console.error(
       "Erreur lors du nettoyage des données d'authentification:",
