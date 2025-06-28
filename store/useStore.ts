@@ -3,23 +3,18 @@ import { User } from "@/services/userServices";
 import { create } from "zustand";
 
 interface Store {
-  // État utilisateur
   user: User | null;
   setUser: (user: User | null) => void;
 
-  // État premium
   isPremium: boolean;
   setIsPremium: (status: boolean) => void;
 
-  // État abonnement à vie
   isLifetime: boolean;
   setIsLifetime: (status: boolean) => void;
 
-  // État catégorie
   selectedCategory: string | null;
   setSelectedCategory: (category: string | null) => void;
 
-  // État favoris
   favorites: Recipe[];
   addToFavorites: (recipe: Recipe) => void;
   removeFromFavorites: (recipeId: string) => void;
@@ -28,23 +23,18 @@ interface Store {
 }
 
 export const useStore = create<Store>((set, get) => ({
-  // État utilisateur
   user: null,
   setUser: (user) => set({ user }),
 
-  // État premium
   isPremium: false,
   setIsPremium: (status) => set({ isPremium: status }),
 
-  // État abonnement à vie
   isLifetime: false,
   setIsLifetime: (status) => set({ isLifetime: status }),
 
-  // État catégorie
   selectedCategory: null,
   setSelectedCategory: (category) => set({ selectedCategory: category }),
 
-  // État favoris
   favorites: [],
   setFavorites: (recipes) => set({ favorites: recipes }),
   addToFavorites: (recipe) => {

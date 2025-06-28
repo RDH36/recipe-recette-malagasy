@@ -1,10 +1,8 @@
 import type { Recipe } from "@/Types/RecipeType";
-import { AdBanner } from "@/components/Ads";
 import Banner from "@/components/Banner/Banner";
 import CategoryView from "@/components/CategoryView/CategoryView";
 import Header from "@/components/Header/Header";
 import PremiumSection from "@/components/PremiumCTA/PremiumSection";
-import { useAdMob } from "@/contexts/AdMobContext";
 import {
   getNotPopularRecipes,
   getPopularRecipes,
@@ -23,7 +21,6 @@ export default function Index() {
   const [notPopularRecipes, setNotPopularRecipes] = useState<Recipe[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { showAds } = useAdMob();
 
   const fetchRecipes = async () => {
     try {
@@ -94,13 +91,7 @@ export default function Index() {
           <View className="mt-6 px-4 mb-4">
             <PremiumSection />
           </View>
-
-          {showAds && <View style={{ height: 50 }} />}
         </ScrollView>
-
-        <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
-          <AdBanner />
-        </View>
       </View>
     </View>
   );

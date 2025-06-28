@@ -5,6 +5,7 @@ interface NetworkStatus {
   isConnected: boolean;
   isInternetReachable: boolean | null;
   type: string | null;
+  handleRetry: () => void;
 }
 
 export const useNetworkStatus = (): NetworkStatus => {
@@ -12,22 +13,20 @@ export const useNetworkStatus = (): NetworkStatus => {
     isConnected: true,
     isInternetReachable: true,
     type: "unknown",
+    handleRetry: () => {},
   });
 
+  const checkConnection = async () => {
+    try {
+      const state = await NetInfo.fetch();
+      updateNetworkStatus(state);
+    } catch (error) {
+      console.error("Erreur lors de la vérification réseau initiale:", error);
+    }
+  };
+
   useEffect(() => {
-    // Vérification initiale
-    const checkConnection = async () => {
-      try {
-        const state = await NetInfo.fetch();
-        updateNetworkStatus(state);
-      } catch (error) {
-        console.error("Erreur lors de la vérification réseau initiale:", error);
-      }
-    };
-
     checkConnection();
-
-    // Abonnement aux changements d'état de la connexion
     const unsubscribe = NetInfo.addEventListener(updateNetworkStatus);
 
     return () => {
@@ -35,13 +34,17 @@ export const useNetworkStatus = (): NetworkStatus => {
     };
   }, []);
 
-  // Mise à jour de l'état de la connexion
   const updateNetworkStatus = (state: NetInfoState) => {
     setNetworkStatus({
       isConnected: !!state.isConnected,
       isInternetReachable: state.isInternetReachable,
       type: state.type,
+      handleRetry,
     });
+  };
+
+  const handleRetry = async () => {
+    checkConnection();
   };
 
   return networkStatus;

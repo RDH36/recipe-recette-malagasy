@@ -1,5 +1,5 @@
 import { Recipe } from "@/Types/RecipeType";
-import { supabase } from "../config/supabase";
+import { supabase } from "@/lib/supabase";
 
 interface SupabaseRecipe {
   id: string;

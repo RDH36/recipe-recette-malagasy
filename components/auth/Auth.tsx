@@ -1,4 +1,4 @@
-import { supabase } from "@/config/supabase";
+import { supabase } from "@/lib/supabase";
 import { createOrUpdateUser } from "@/services/userServices";
 import {
   GoogleSignin,

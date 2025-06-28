@@ -1,10 +1,6 @@
-import {
-  SubscriptionType,
-  getSubscriptionPrice,
-} from "@/services/stripeServices";
 import { useStore } from "@/store/useStore";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { ArrowLeft, CreditCard } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -18,10 +14,13 @@ import {
   View,
 } from "react-native";
 
-export default function PaymentScreen() {
-  const params = useLocalSearchParams<{ type: SubscriptionType }>();
-  const subscriptionType = (params.type as SubscriptionType) || "monthly";
-  const amount = getSubscriptionPrice(subscriptionType);
+interface PaymentScreenProps {
+  subscriptionType: "monthly" | "yearly" | "lifetime";
+}
+
+export default function PaymentScreen({
+  subscriptionType,
+}: PaymentScreenProps) {
   const { user, setIsPremium, setIsLifetime } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -137,7 +136,7 @@ export default function PaymentScreen() {
             Paiement sécurisé
           </Text>
           <Text className="text-2xl font-bold text-primary text-center mb-6">
-            {amount.toFixed(2)} €
+            {subscriptionType === "monthly" ? "1,99 €" : "19,99 €"}
           </Text>
 
           <View className="mb-4">

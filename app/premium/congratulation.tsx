@@ -23,14 +23,11 @@ import Animated, {
 export default function PremiumCongratulationScreen() {
   const { isPremium, isLifetime } = useStore();
 
-  // Initialisation des valeurs partagées pour l'animation
   const scaleValue = useSharedValue(1);
   const translateY = useSharedValue(20);
   const opacity = useSharedValue(0);
 
-  // Animation de pulsation pour le badge
   useEffect(() => {
-    // Animation de pulsation avec withDelay pour éviter les problèmes d'immutabilité
     const animationTimeout = setTimeout(() => {
       scaleValue.value = withDelay(
         100,
@@ -43,7 +40,6 @@ export default function PremiumCongratulationScreen() {
         )
       );
 
-      // Animation de montée pour les éléments
       translateY.value = withDelay(200, withTiming(0, { duration: 800 }));
 
       opacity.value = withDelay(200, withTiming(1, { duration: 800 }));
@@ -52,7 +48,6 @@ export default function PremiumCongratulationScreen() {
     return () => clearTimeout(animationTimeout);
   }, []);
 
-  // Définition des styles animés
   const badgeStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scaleValue.value }],
@@ -66,7 +61,6 @@ export default function PremiumCongratulationScreen() {
     };
   });
 
-  // Titre et message adaptés au type d'abonnement
   const title = isLifetime
     ? "Félicitations pour Votre Premium à Vie!"
     : "Félicitations pour Votre Abonnement Premium!";
@@ -80,7 +74,9 @@ export default function PremiumCongratulationScreen() {
       <StatusBar barStyle="dark-content" />
       <ScrollView className="flex-1 p-4">
         <View className="items-center justify-center">
-          <Animated.View style={[badgeStyle, { alignItems: 'center', marginVertical: 40 }]}>
+          <Animated.View
+            style={[badgeStyle, { alignItems: "center", marginVertical: 40 }]}
+          >
             <View className="w-32 h-32 rounded-full bg-primary/5 items-center justify-center">
               <LinearGradient
                 colors={
@@ -98,7 +94,10 @@ export default function PremiumCongratulationScreen() {
           </Animated.View>
 
           <Animated.View
-            style={[contentStyle, { width: '100%', alignItems: 'center', paddingHorizontal: 16 }]}
+            style={[
+              contentStyle,
+              { width: "100%", alignItems: "center", paddingHorizontal: 16 },
+            ]}
           >
             <Text className="text-3xl font-bold text-text-primary text-center mb-4">
               {title}

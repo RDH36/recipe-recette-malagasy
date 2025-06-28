@@ -1,11 +1,8 @@
-import { useStore } from "@/store/useStore"
-import { Ionicons } from "@expo/vector-icons"
-import { Tabs } from "expo-router"
-import { Pressable } from "react-native"
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import { Pressable } from "react-native";
 
 export default function TabsLayout() {
-  const setSelectedCategory = useStore((state) => state.setSelectedCategory)
-
   return (
     <>
       <Tabs
@@ -89,5 +86,5 @@ export default function TabsLayout() {
         />
       </Tabs>
     </>
-  )
+  );
 }

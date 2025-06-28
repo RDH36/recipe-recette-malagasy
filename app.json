@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tsikonina",
     "slug": "recipe-recette-malagasy",
-    "version": "0.2.1",
+    "version": "0.2.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -54,12 +54,6 @@
           "icon": "./assets/icons/notification.png",
           "color": "#ffffff",
           "enableBackgroundRemoteNotifications": false
-        }
-      ],
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-8114482764700286~9549447687"
         }
       ],
       "@react-native-google-signin/google-signin",

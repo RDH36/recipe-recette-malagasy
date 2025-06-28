@@ -1,4 +1,4 @@
-import { supabase } from "@/config/supabase";
+import { supabase } from "@/lib/supabase";
 
 // Type pour l'utilisateur
 export interface User {
@@ -79,15 +79,15 @@ export const createOrUpdateUser = async (
 export const updatePremiumStatus = async (
   userId: string,
   isPremium: boolean,
-  subscriptionType: 'monthly' | 'yearly' = 'monthly'
+  subscriptionType: "monthly" | "yearly" = "monthly"
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from("users")
-      .update({ 
-        isPremium, 
+      .update({
+        isPremium,
         subscriptionType: isPremium ? subscriptionType : null,
-        updated_at: new Date().toISOString() 
+        updated_at: new Date().toISOString(),
       })
       .eq("id", userId);
 

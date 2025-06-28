@@ -1,59 +1,41 @@
-import RecipeDetail from "@/components/RecipeDetail/RecipeDetail"
-import { useAdMob } from "@/contexts/AdMobContext"
-import { showInterstitialAd } from "@/services/adMobService"
-import { getRecipeById } from "@/services/recipeService"
-import { Recipe } from "@/Types/RecipeType"
-import { router, useLocalSearchParams } from "expo-router"
-import { useEffect, useState } from "react"
+import RecipeDetail from "@/components/RecipeDetail/RecipeDetail";
+
+import { getRecipeById } from "@/services/recipeService";
+import { Recipe } from "@/Types/RecipeType";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-} from "react-native"
+} from "react-native";
 
 export default function RecipeDetails() {
-  const { id } = useLocalSearchParams()
-  const [recipe, setRecipe] = useState<Recipe | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { showAds } = useAdMob()
-  const [adShown, setAdShown] = useState(false)
+  const { id } = useLocalSearchParams();
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [adShown, setAdShown] = useState(false);
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         if (typeof id === "string") {
-          const data = await getRecipeById(id)
-          setRecipe(data)
+          const data = await getRecipeById(id);
+          setRecipe(data);
         }
       } catch (err) {
-        setError("Une erreur est survenue lors du chargement de la recette")
-        console.error("Error fetching recipe:", err)
+        setError("Une erreur est survenue lors du chargement de la recette");
+        console.error("Error fetching recipe:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchRecipe()
-  }, [id])
-  
-  // Afficher une publicité interstitielle lorsque l'écran est chargé
-  // Mais seulement pour les utilisateurs non premium et une fois par session
-  useEffect(() => {
-    const showAd = async () => {
-      if (showAds && !loading && !adShown && recipe) {
-        // Attendre un court délai pour que l'utilisateur puisse voir la recette d'abord
-        setTimeout(async () => {
-          await showInterstitialAd()
-          setAdShown(true)
-        }, 2000) // Délai de 2 secondes
-      }
-    }
-    
-    showAd()
-  }, [showAds, loading, adShown, recipe])
+    fetchRecipe();
+  }, [id]);
 
   if (loading) {
     return (
@@ -63,7 +45,7 @@ export default function RecipeDetails() {
           Chargement de la recette...
         </Text>
       </View>
-    )
+    );
   }
 
   if (error) {
@@ -77,7 +59,7 @@ export default function RecipeDetails() {
           <Text className="text-neutral-white">Retour</Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   if (!recipe) {
@@ -93,7 +75,7 @@ export default function RecipeDetails() {
           <Text className="text-neutral-white">Retour</Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   return (
@@ -102,5 +84,5 @@ export default function RecipeDetails() {
         <RecipeDetail recipe={recipe} />
       </ScrollView>
     </View>
-  )
+  );
 }

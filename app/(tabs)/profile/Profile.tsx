@@ -1,7 +1,5 @@
-import { AdRewardedButton } from "@/components/Ads";
 import Auth from "@/components/auth/Auth";
-import { supabase } from "@/config/supabase";
-import { useAdMob } from "@/contexts/AdMobContext";
+import { supabase } from "@/lib/supabase";
 import { useStore } from "@/store/useStore";
 import { Session } from "@supabase/supabase-js";
 import { LinearGradient } from "expo-linear-gradient";
@@ -13,11 +11,9 @@ import {
   Diamond,
   Heart,
   LogOut,
-  Play,
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Image,
   ImageBackground,
   Text,
@@ -26,15 +22,11 @@ import {
 } from "react-native";
 
 export default function Profile() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [tempPremium, setTempPremium] = useState(false);
   const [tempPremiumTimeLeft, setTempPremiumTimeLeft] = useState(0);
 
-  // Récupérer les états globaux
-  const { user, isPremium, isLifetime, setIsPremium } = useStore();
-  const { showAds } = useAdMob();
+  const { isPremium, isLifetime, setIsPremium, setUser } = useStore();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -156,48 +148,6 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
 
-            {showAds && !tempPremium && (
-              <View className="mt-4 pt-4 border-t border-neutral-200">
-                <View className="flex-row items-center mb-2">
-                  <Play size={16} color="#FF8050" />
-                  <Text className="ml-2 text-text-primary font-medium">
-                    Essayer Premium gratuitement
-                  </Text>
-                </View>
-                <Text className="text-text-secondary text-xs mb-3">
-                  Regardez une publicité pour débloquer 30 minutes d'accès
-                  Premium
-                </Text>
-                <AdRewardedButton
-                  buttonText="Regarder une publicité"
-                  style={{ backgroundColor: "#4CAF50" }}
-                  onRewarded={(rewarded) => {
-                    if (rewarded) {
-                      setTempPremium(true);
-                      setIsPremium(true);
-                      setTempPremiumTimeLeft(30 * 60);
-
-                      const interval = setInterval(() => {
-                        setTempPremiumTimeLeft((prev) => {
-                          if (prev <= 1) {
-                            clearInterval(interval);
-                            setTempPremium(false);
-                            setIsPremium(false);
-                            Alert.alert(
-                              "Accès Premium expiré",
-                              "Votre accès Premium temporaire a expiré. Regardez une autre publicité ou abonnez-vous pour continuer à profiter des fonctionnalités Premium."
-                            );
-                            return 0;
-                          }
-                          return prev - 1;
-                        });
-                      }, 1000);
-                    }
-                  }}
-                />
-              </View>
-            )}
-
             {tempPremium && (
               <View className="mt-4 pt-4 border-t border-neutral-200">
                 <View className="flex-row items-center justify-between">
@@ -263,7 +213,10 @@ export default function Profile() {
           </View>
 
           <TouchableOpacity
-            onPress={() => supabase.auth.signOut()}
+            onPress={() => {
+              supabase.auth.signOut();
+              setUser(null);
+            }}
             className="flex-row items-center justify-center bg-white border border-red-500 p-2 rounded-2xl shadow-sm"
           >
             <LogOut size={20} className="text-red-500 mr-2" />

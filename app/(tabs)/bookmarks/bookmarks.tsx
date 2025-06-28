@@ -1,14 +1,35 @@
 import { Recipe } from "@/Types/RecipeType";
 import FavoriteButton from "@/components/FavoriteButton/FavoriteButton";
+import { supabase } from "@/lib/supabase";
+import { initAppData } from "@/services/appInitService";
 import { useStore } from "@/store/useStore";
-import { router } from "expo-router";
+import { Session } from "@supabase/supabase-js";
+import { router, useFocusEffect } from "expo-router";
 import { HeartIcon } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function BookmarksScreen() {
-  const { user, favorites } = useStore();
+  const [session, setSession] = useState<Session | null>(null);
+  const { user, favorites, setFavorites, setUser } = useStore();
 
-  // Si l'utilisateur n'est pas connecté
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (session) {
+        initAppData(session);
+      }
+    }, [session])
+  );
+
   if (!user) {
     return (
       <View className="flex-1 bg-neutral-white px-4">
@@ -36,7 +57,6 @@ export default function BookmarksScreen() {
     );
   }
 
-  // Si l'utilisateur est connecté mais n'a pas de favoris
   if (favorites.length === 0) {
     return (
       <View className="flex-1 bg-neutral-white px-4">
