@@ -1,63 +1,58 @@
-import { handleShare } from "@/utils/utilis"
-import { useRouter, useLocalSearchParams } from "expo-router"
+import { Recipe } from "@/Types/RecipeType";
+import { getRecipeById } from "@/services/recipeService";
+import { handleShare } from "@/utils/utilis";
+import { Text } from "expo-dynamic-fonts";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Home, Share2, Star } from "lucide-react-native";
+import { useEffect, useRef, useState } from "react";
 import {
-  Home,
-  Share2,
-  Star,
-  Trophy,
-  UtensilsCrossed,
-} from "lucide-react-native"
-import React, { useEffect, useRef, useState } from "react"
-import {
+  ActivityIndicator,
   Dimensions,
+  Image,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-} from "react-native"
-import ConfettiCannon from "react-native-confetti-cannon"
-import ViewShot from "react-native-view-shot"
-import { Recipe } from "@/Types/RecipeType"
-import { getRecipeById } from "@/services/recipeService"
-import { Text } from "expo-dynamic-fonts"
-import { LinearGradient } from "expo-linear-gradient"
+} from "react-native";
+import ConfettiCannon from "react-native-confetti-cannon";
+import ViewShot from "react-native-view-shot";
 
 const Congratulations = () => {
-  const router = useRouter()
-  const { id } = useLocalSearchParams()
-  const [recipe, setRecipe] = useState<Recipe | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const confettiRef = useRef<any>(null)
-  const viewShotRef = useRef<ViewShot>(null)
-  const { width } = Dimensions.get("window")
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const confettiRef = useRef<any>(null);
+  const viewShotRef = useRef<ViewShot>(null);
+  const { width } = Dimensions.get("window");
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         if (typeof id === "string") {
-          const data = await getRecipeById(id)
-          setRecipe(data)
+          const data = await getRecipeById(id);
+          setRecipe(data);
         }
       } catch (err) {
-        setError("Une erreur est survenue lors du chargement de la recette")
-        console.error("Error fetching recipe:", err)
+        setError("Une erreur est survenue lors du chargement de la recette");
+        console.error("Error fetching recipe:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchRecipe()
-  }, [id])
+    fetchRecipe();
+  }, [id]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       if (confettiRef.current && !loading && recipe) {
-        confettiRef.current.start()
+        confettiRef.current.start();
       }
-    }, 100)
+    }, 100);
 
-    return () => clearTimeout(timer)
-  }, [loading, recipe])
+    return () => clearTimeout(timer);
+  }, [loading, recipe]);
 
   if (loading) {
     return (
@@ -67,7 +62,7 @@ const Congratulations = () => {
           Chargement de la recette...
         </Text>
       </View>
-    )
+    );
   }
 
   if (error) {
@@ -84,7 +79,7 @@ const Congratulations = () => {
           </Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   if (!recipe) {
@@ -103,7 +98,7 @@ const Congratulations = () => {
           </Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
   const ShareContent = () => (
@@ -115,7 +110,10 @@ const Congratulations = () => {
     >
       <View className="items-center">
         <View className="bg-primary/10 p-6 rounded-full mb-6 relative">
-          <Trophy size={80} className="text-neutral-white" />
+          <Image
+            source={require("../../../assets/icons/adaptive-icon.png")}
+            className="w-20 h-20"
+          />
         </View>
 
         <Text className="text-2xl font-bold mb-2 text-neutral-white">
@@ -135,7 +133,10 @@ const Congratulations = () => {
         </View>
 
         <View className="flex-row items-center gap-2">
-          <UtensilsCrossed size={24} className="text-neutral-white" />
+          <Image
+            source={require("../../../assets/icons/adaptive-icon.png")}
+            className="w-10 h-10"
+          />
           <Text className="text-neutral-white font-bold" font="Pacifico">
             Tsikonina
           </Text>
@@ -145,7 +146,7 @@ const Congratulations = () => {
         </Text>
       </View>
     </LinearGradient>
-  )
+  );
 
   return (
     <View className="flex-1 bg-white">
@@ -174,7 +175,10 @@ const Congratulations = () => {
       <View className="flex-1">
         <View className="flex-1 justify-center items-center p-4">
           <View className="bg-primary/10 p-6 rounded-full mb-6 relative">
-            <Trophy size={80} className="text-primary" />
+            <Image
+              source={require("../../../assets/icons/adaptive-icon.png")}
+              className="w-28 h-28"
+            />
           </View>
 
           <Text className="text-2xl font-bold mb-2 text-primary">
@@ -196,7 +200,10 @@ const Congratulations = () => {
           </View>
 
           <View className="mt-8 flex-row items-center gap-2">
-            <UtensilsCrossed size={24} className="text-primary" />
+            <Image
+              source={require("../../../assets/icons/adaptive-icon.png")}
+              className="w-10 h-10"
+            />
             <Text className="text-primary font-bold" font="Pacifico">
               Tsikonina
             </Text>
@@ -242,7 +249,7 @@ const Congratulations = () => {
         </TouchableOpacity>
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default Congratulations
+export default Congratulations;

@@ -4,7 +4,7 @@
     "slug": "recipe-recette-malagasy",
     "version": "0.2.3",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/adaptive-icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -40,14 +40,6 @@
     "plugins": [
       "expo-router",
       "expo-media-library",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/icon.png",
-          "imageResizeMode": "cover",
-          "backgroundColor": "#ffffff"
-        }
-      ],
       [
         "expo-notifications",
         {
