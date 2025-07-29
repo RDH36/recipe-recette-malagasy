@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF00"
+        "backgroundColor": "#FFFFFF"
       },
       "permissions": [
         "NOTIFICATIONS",
