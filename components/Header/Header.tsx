@@ -9,7 +9,7 @@ export default function Header() {
       <View className="flex flex-row justify-between items-center px-4 py-2">
         <View className="flex flex-row items-center gap-2 justify-center">
           <Image
-            source={require("../../assets/icons/adaptive-icon.png")}
+            source={require("../../assets/images/mascote.png")}
             className="w-10 h-10"
           />
           <Text

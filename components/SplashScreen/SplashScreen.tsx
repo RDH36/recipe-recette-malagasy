@@ -1,14 +1,15 @@
 import { Text } from "expo-dynamic-fonts";
 import { LinearGradient } from "expo-linear-gradient";
-import { UtensilsCrossed } from "lucide-react-native";
-import { useEffect } from "react";
+import { Image } from "react-native";
+import { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, View } from "react-native";
 
 export default function SplashScreenAnimated() {
-  // Animation pour le rebond
-  const bounceAnim = new Animated.Value(0);
+  // Animation pour le rebond et le pulse
+  const bounceAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
   // Animation pour les points de chargement
-  const dotsAnim = new Animated.Value(0);
+  const dotsAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Animation de rebond
@@ -43,13 +44,27 @@ export default function SplashScreenAnimated() {
       }),
     ]);
 
-    Animated.loop(bounce, {
-      iterations: -1,
-    }).start();
+    Animated.loop(bounce).start();
 
-    Animated.loop(dots, {
-      iterations: -1,
-    }).start();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.1,
+          duration: 500,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.quad),
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.quad),
+        }),
+      ])
+    ).start();
+
+    // Lancer l'animation des points en boucle
+    Animated.loop(dots).start();
   }, []);
 
   const dotsOpacity = dotsAnim.interpolate({
@@ -59,19 +74,17 @@ export default function SplashScreenAnimated() {
 
   return (
     <LinearGradient
-      colors={["#FF7A29", "#FFD54F"]}
+      colors={["#FF8050", "#FFB36B"]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       className="flex-1 items-center justify-center"
     >
       <View className="items-center">
-        <Animated.View
-          style={{
-            transform: [{ translateY: bounceAnim }],
-          }}
-        >
-          <UtensilsCrossed size={48} className="text-neutral-50" />
-        </Animated.View>
+        <Animated.Image
+          source={require("../../assets/images/mascote.png")}
+          style={{ width: 140, height: 140, transform: [{ translateY: bounceAnim }, { scale: scaleAnim }] }}
+          resizeMode="contain"
+        />
 
         <Text
           className="text-neutral-white mb-2"

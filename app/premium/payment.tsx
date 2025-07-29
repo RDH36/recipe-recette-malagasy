@@ -1,10 +1,10 @@
+import CookingLoader from "@/components/Loading/CookingLoader";
 import { useStore } from "@/store/useStore";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ArrowLeft, CreditCard } from "lucide-react-native";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   ImageBackground,
   ScrollView,
@@ -190,7 +190,7 @@ export default function PaymentScreen({
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <CookingLoader message="Paiement en cours..." />
             ) : (
               <Text className="text-white font-semibold text-base">
                 Payer maintenant

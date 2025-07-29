@@ -19,7 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/adaptive-icon.png",
-        "backgroundColor": "#FF8050"
+        "backgroundColor": "#FFFFFF00"
       },
       "permissions": [
         "NOTIFICATIONS",
@@ -40,6 +40,13 @@
     "plugins": [
       "expo-router",
       "expo-media-library",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/icons/splash-icon-light.png"
+        }
+      ],
       [
         "expo-notifications",
         {

@@ -1,4 +1,5 @@
 import { Recipe } from "@/Types/RecipeType";
+import CookingLoader from "@/components/Loading/CookingLoader";
 import { getRecipeById } from "@/services/recipeService";
 import { handleShare } from "@/utils/utilis";
 import { Text } from "expo-dynamic-fonts";
@@ -6,13 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Home, Share2, Star } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Dimensions,
-  Image,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, Image, TouchableOpacity, View } from "react-native";
 import ConfettiCannon from "react-native-confetti-cannon";
 import ViewShot from "react-native-view-shot";
 
@@ -57,10 +52,7 @@ const Congratulations = () => {
   if (loading) {
     return (
       <View className="flex-1 bg-white items-center justify-center">
-        <ActivityIndicator size="large" color="#FF8050" />
-        <Text className="mt-4 text-text-primary">
-          Chargement de la recette...
-        </Text>
+        <CookingLoader message="Chargement de la recette..." />
       </View>
     );
   }

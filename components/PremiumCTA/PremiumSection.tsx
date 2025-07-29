@@ -9,7 +9,7 @@ export default function PremiumSection() {
 
   return (
     <View className="mx-4 my-6">
-      <View className="rounded-2xl overflow-hidden bg-primary shadow-lg shadow-primary/30">
+      <View className="rounded-cartoon overflow-hidden bg-primary shadow-cartoon">
         <View className="absolute top-0 right-0">
           <Sparkles
             size={120}

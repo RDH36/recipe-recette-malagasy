@@ -40,7 +40,7 @@ export default function CategoryView({
           <RecipeCard
             key={recipe.id}
             recipe={recipe}
-            style="horizontal"
+            style="plate"
             onPress={() => router.push(`/recipe/${recipe.id}`)}
             allRecipes={allRecipes}
           />

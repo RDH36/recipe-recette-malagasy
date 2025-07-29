@@ -1,5 +1,3 @@
-import SplashScreenAnimated from "@/components/SplashScreen/SplashScreen";
-
 import NetworkErrorScreen from "@/components/NetworkStatus/NetworkErrorScreen";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
 import { supabase } from "@/lib/supabase";
@@ -49,7 +47,7 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!isReady) {
-    return <SplashScreenAnimated />;
+    return null;
   }
 
   if (!isConnected || !isInternetReachable) {

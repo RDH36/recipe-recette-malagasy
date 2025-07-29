@@ -32,6 +32,12 @@ module.exports = {
           disabled: "#9E9E9E",
         },
       },
+      borderRadius: {
+        cartoon: "30px",
+      },
+      boxShadow: {
+        cartoon: "0 4px 6px rgba(0,0,0,0.1)",
+      },
       gradientColorStops: {
         "orange-500": "#FF7A29",
         "yellow-400": "#FFD54F",

@@ -1,16 +1,11 @@
+import CookingLoader from "@/components/Loading/CookingLoader";
 import RecipeDetail from "@/components/RecipeDetail/RecipeDetail";
 
 import { getRecipeById } from "@/services/recipeService";
 import { Recipe } from "@/Types/RecipeType";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function RecipeDetails() {
   const { id } = useLocalSearchParams();
@@ -40,10 +35,7 @@ export default function RecipeDetails() {
   if (loading) {
     return (
       <View className="flex-1 bg-neutral-white items-center justify-center">
-        <ActivityIndicator size="large" color="#FF8050" />
-        <Text className="mt-4 text-text-primary">
-          Chargement de la recette...
-        </Text>
+        <CookingLoader message="Chargement de la recette..." />
       </View>
     );
   }

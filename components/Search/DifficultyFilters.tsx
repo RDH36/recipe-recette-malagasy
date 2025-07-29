@@ -1,11 +1,10 @@
-import { Text, TouchableOpacity, View } from "react-native"
-import { ScrollView } from "react-native"
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"]
+const difficultyFilters = ["Tous", "Facile", "Moyen", "Difficile"];
 
 interface DifficultyFiltersProps {
-  selectedFilter: string
-  onFilterChange: (filter: string) => void
+  selectedFilter: string;
+  onFilterChange: (filter: string) => void;
 }
 
 export const DifficultyFilters: React.FC<DifficultyFiltersProps> = ({
@@ -38,5 +37,5 @@ export const DifficultyFilters: React.FC<DifficultyFiltersProps> = ({
         </View>
       </ScrollView>
     </View>
-  )
-}
+  );
+};

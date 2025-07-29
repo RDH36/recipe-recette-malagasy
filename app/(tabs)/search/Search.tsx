@@ -1,4 +1,5 @@
 import { Recipe } from "@/Types/RecipeType";
+import CookingLoader from "@/components/Loading/CookingLoader";
 import { RecipeCard } from "@/components/RecipeCard/RecipeCard";
 import { DifficultyFilters } from "@/components/Search/DifficultyFilters";
 import Search from "@/components/Search/Search";
@@ -9,7 +10,6 @@ import { router, useNavigation } from "expo-router";
 import { ArrowLeftIcon } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   Text,
@@ -148,10 +148,7 @@ export default function SearchScreen() {
 
       {loading ? (
         <View className="flex-1 bg-neutral-white items-center justify-center">
-          <ActivityIndicator size="large" color="#FF8050" />
-          <Text className="mt-4 text-text-primary">
-            Chargement des recettes...
-          </Text>
+          <CookingLoader message="Chargement des recettes..." />
         </View>
       ) : error ? (
         <View className="flex-1 items-center justify-center p-4">

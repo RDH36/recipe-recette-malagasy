@@ -2,19 +2,14 @@ import type { Recipe } from "@/Types/RecipeType";
 import Banner from "@/components/Banner/Banner";
 import CategoryView from "@/components/CategoryView/CategoryView";
 import Header from "@/components/Header/Header";
+import CookingLoader from "@/components/Loading/CookingLoader";
 import PremiumSection from "@/components/PremiumCTA/PremiumSection";
 import {
   getNotPopularRecipes,
   getPopularRecipes,
 } from "@/services/recipeService";
 import { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  RefreshControl,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 
 export default function Index() {
   const [popularRecipes, setPopularRecipes] = useState<Recipe[]>([]);
@@ -48,10 +43,7 @@ export default function Index() {
   if (loading) {
     return (
       <View className="flex-1 bg-neutral-white items-center justify-center">
-        <ActivityIndicator size="large" color="#FF8050" />
-        <Text className="mt-4 text-text-primary">
-          Chargement des recettes...
-        </Text>
+        <CookingLoader message="Préparation des gourmandises..." />
       </View>
     );
   }
