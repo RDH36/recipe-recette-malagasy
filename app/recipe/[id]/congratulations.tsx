@@ -126,7 +126,7 @@ const Congratulations = () => {
 
         <View className="flex-row items-center gap-2">
           <Image
-            source={require("../../../assets/icons/adaptive-icon.png")}
+            source={require("../../../assets/images/mascote.png")}
             className="w-10 h-10"
           />
           <Text className="text-neutral-white font-bold" font="Pacifico">
@@ -168,7 +168,7 @@ const Congratulations = () => {
         <View className="flex-1 justify-center items-center p-4">
           <View className="bg-primary/10 p-6 rounded-full mb-6 relative">
             <Image
-              source={require("../../../assets/icons/adaptive-icon.png")}
+              source={require("../../../assets/images/mascote.png")}
               className="w-28 h-28"
             />
           </View>
@@ -193,7 +193,7 @@ const Congratulations = () => {
 
           <View className="mt-8 flex-row items-center gap-2">
             <Image
-              source={require("../../../assets/icons/adaptive-icon.png")}
+              source={require("../../../assets/images/mascote.png")}
               className="w-10 h-10"
             />
             <Text className="text-primary font-bold" font="Pacifico">

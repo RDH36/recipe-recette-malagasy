@@ -1,5 +1,4 @@
 import { Text } from "expo-dynamic-fonts";
-import { Image } from "react-native";
 import { useEffect, useRef } from "react";
 import { Animated, Easing, View } from "react-native";
 
@@ -55,11 +54,15 @@ export default function CookingLoader({ message = "Préparation en cours..." }) 
     <View className="items-center justify-center">
       <Animated.Image
         source={require("../../assets/images/mascote.png")}
-        style={{ width: 120, height: 120, transform: [{ translateY: bounceAnim }, { scale }] }}
+        style={{
+          width: 120,
+          height: 120,
+          transform: [{ translateY: bounceAnim }, { scale }],
+        }}
         resizeMode="contain"
       />
       <Animated.View style={{ transform: [{ translateY: bounceAnim }] }}>
-        <Text className="text-primary font-semibold mt-2" font="Pacifico">
+        <Text className="text-primary  mt-2 p-4" font="Pacifico">
           {message}
         </Text>
       </Animated.View>

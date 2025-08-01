@@ -2,9 +2,10 @@ import NetworkErrorScreen from "@/components/NetworkStatus/NetworkErrorScreen";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
 import { supabase } from "@/lib/supabase";
 import { initAppData } from "@/services/appInitService";
+import { checkOnboardingStatus } from "@/services/onboardingService";
 import { Session } from "@supabase/supabase-js";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 import "../global.css";
@@ -17,7 +18,11 @@ export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
   const { isConnected, isInternetReachable, handleRetry } = useNetworkStatus();
   const [session, setSession] = useState<Session | null>(null);
+  const [onboardingCompleted, setOnboardingCompleted] = useState<
+    boolean | null
+  >(null);
 
+  // First useEffect for auth session
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -27,6 +32,7 @@ export default function RootLayout() {
     });
   }, []);
 
+  // Second useEffect for app preparation
   useEffect(() => {
     async function prepare() {
       try {
@@ -36,6 +42,11 @@ export default function RootLayout() {
         if (session) {
           await initAppData(session);
         }
+
+        // Check if onboarding has been completed
+        const onboardingStatus = await checkOnboardingStatus();
+        setOnboardingCompleted(onboardingStatus);
+
         setIsReady(true);
       } catch (e) {
         console.warn("Erreur lors de la préparation de l'application:", e);
@@ -44,7 +55,14 @@ export default function RootLayout() {
     }
 
     prepare();
-  }, [loaded]);
+  }, [loaded, error, session]);
+
+  // Third useEffect for navigation after component is mounted
+  useEffect(() => {
+    if (isReady && onboardingCompleted === false) {
+      router.replace("/onboarding");
+    }
+  }, [isReady, onboardingCompleted]);
 
   if (!isReady) {
     return null;
@@ -58,6 +76,11 @@ export default function RootLayout() {
     <View style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="onboarding/index"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="recipe/[id]" options={{ headerShown: false }} />
         <Stack.Screen
           name="recipe/[id]/cooking"

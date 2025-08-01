@@ -11,6 +11,8 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
 
+import { useStore } from "@/store/useStore";
+
 export default function Index() {
   const [popularRecipes, setPopularRecipes] = useState<Recipe[]>([]);
   const [notPopularRecipes, setNotPopularRecipes] = useState<Recipe[]>([]);
@@ -81,7 +83,7 @@ export default function Index() {
           />
 
           <View className="mt-6 px-4 mb-4">
-            <PremiumSection />
+            {useStore.getState().isPremium ? null : <PremiumSection />}
           </View>
         </ScrollView>
       </View>
