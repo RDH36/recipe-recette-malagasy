@@ -57,6 +57,20 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
+          name="community/index"
+          options={{
+            title: "Communauté",
+            tabBarIcon: ({ focused, color }) => (
+              <Ionicons
+                name={focused ? "people" : "people-outline"}
+                size={24}
+                color={color}
+                style={{ marginTop: 1 }}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="bookmarks/bookmarks"
           options={{
             title: "Favoris",
@@ -82,6 +96,18 @@ export default function TabsLayout() {
                 style={{ marginTop: 1 }}
               />
             ),
+          }}
+        />
+        <Tabs.Screen
+          name="community/create"
+          options={{
+            href: null, // Cache cet écran de la navigation
+          }}
+        />
+        <Tabs.Screen
+          name="community/article/[id]"
+          options={{
+            href: null, // Cache cet écran de la navigation
           }}
         />
       </Tabs>

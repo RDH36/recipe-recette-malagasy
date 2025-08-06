@@ -1,3 +1,4 @@
+import CookingLoader from "@/components/Loading/CookingLoader";
 import NetworkErrorScreen from "@/components/NetworkStatus/NetworkErrorScreen";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
 import { supabase } from "@/lib/supabase";
@@ -22,7 +23,6 @@ export default function RootLayout() {
     boolean | null
   >(null);
 
-  // First useEffect for auth session
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -32,20 +32,19 @@ export default function RootLayout() {
     });
   }, []);
 
-  // Second useEffect for app preparation
   useEffect(() => {
     async function prepare() {
       try {
         if (!loaded && error) {
           console.warn("Erreur lors du chargement des polices:", error);
         }
-        if (session) {
-          await initAppData(session);
-        }
 
-        // Check if onboarding has been completed
         const onboardingStatus = await checkOnboardingStatus();
         setOnboardingCompleted(onboardingStatus);
+
+        if (session && isConnected && isInternetReachable) {
+          await initAppData(session);
+        }
 
         setIsReady(true);
       } catch (e) {
@@ -55,21 +54,24 @@ export default function RootLayout() {
     }
 
     prepare();
-  }, [loaded, error, session]);
+  }, [loaded, error, session, isConnected, isInternetReachable]);
 
-  // Third useEffect for navigation after component is mounted
   useEffect(() => {
     if (isReady && onboardingCompleted === false) {
       router.replace("/onboarding");
     }
   }, [isReady, onboardingCompleted]);
 
-  if (!isReady) {
-    return null;
+  if (isReady && (!isConnected || !isInternetReachable)) {
+    return <NetworkErrorScreen onRetry={handleRetry} />;
   }
 
-  if (!isConnected || !isInternetReachable) {
-    return <NetworkErrorScreen onRetry={handleRetry} />;
+  if (!isReady) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <CookingLoader message="Is cooking..." />
+      </View>
+    );
   }
 
   return (

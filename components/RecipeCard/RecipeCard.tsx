@@ -49,6 +49,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
     };
     return (
       <TouchableOpacity onPress={onPress} className="mr-4 items-center">
+        <View className="absolute top-2 -left-2 z-10">{renderBadges()}</View>
         <View className="w-[160px] h-[160px] rounded-full border-4 border-primary bg-neutral-white items-center justify-center shadow-cartoon overflow-hidden">
           {recipe.image ? (
             <Image
@@ -63,23 +64,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
           )}
         </View>
 
-        {/* Title */}
         <Text
-          className="text-text-primary text-center font-semibold mt-2 w-[100px]"
+          className="text-text-primary text-center font-semibold mt-2 w-[150px]"
           numberOfLines={1}
         >
           {recipe.title}
         </Text>
-        {/* Description */}
         {recipe.description && (
           <Text
-            className="text-text-secondary text-center text-xs mt-0.5 w-[100px]"
+            className="text-text-secondary text-center text-xs mt-0.5 w-[150px]"
             numberOfLines={2}
           >
             {recipe.description}
           </Text>
         )}
-        {/* Info pill */}
         <View className="flex-row items-center justify-between bg-neutral-white rounded-cartoon px-3 py-2 mt-2 shadow-cartoon gap-3 w-[160px]">
           <View className="flex-row items-center gap-1">
             <Clock size={16} className="text-primary" />

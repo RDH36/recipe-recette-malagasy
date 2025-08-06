@@ -1,6 +1,7 @@
 import type { Recipe } from "@/Types/RecipeType";
 import Banner from "@/components/Banner/Banner";
 import CategoryView from "@/components/CategoryView/CategoryView";
+import CommunitySection from "@/components/CommunitySection/CommunitySection";
 import Header from "@/components/Header/Header";
 import CookingLoader from "@/components/Loading/CookingLoader";
 import PremiumSection from "@/components/PremiumCTA/PremiumSection";
@@ -85,6 +86,8 @@ export default function Index() {
           <View className="mt-6 px-4 mb-4">
             {useStore.getState().isPremium ? null : <PremiumSection />}
           </View>
+
+          <CommunitySection />
         </ScrollView>
       </View>
     </View>
