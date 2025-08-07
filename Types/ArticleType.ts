@@ -5,10 +5,11 @@ export interface Article {
   title: string;
   content: string;
   author: {
+    id?: string;
     name: string;
-    avatar?: ImageSourcePropType;
+    avatar?: ImageSourcePropType | string;
   };
-  images?: ImageSourcePropType[];
+  images?: ImageSourcePropType[] | string[];
   location?: string;
   tags: string[];
   likes: number;
@@ -21,8 +22,9 @@ export interface Article {
 export interface Comment {
   id: string;
   author: {
+    id?: string;
     name: string;
-    avatar?: ImageSourcePropType;
+    avatar?: ImageSourcePropType | string;
   };
   content: string;
   createdAt: string;

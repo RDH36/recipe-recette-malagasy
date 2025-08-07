@@ -8,7 +8,7 @@ import { Session } from "@supabase/supabase-js";
 import { useFonts } from "expo-font";
 import { Stack, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { SafeAreaView, View } from "react-native";
 import "../global.css";
 
 export default function RootLayout() {
@@ -22,6 +22,10 @@ export default function RootLayout() {
   const [onboardingCompleted, setOnboardingCompleted] = useState<
     boolean | null
   >(null);
+
+  if (!isConnected || !isInternetReachable) {
+    return <NetworkErrorScreen onRetry={handleRetry} />;
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -62,10 +66,6 @@ export default function RootLayout() {
     }
   }, [isReady, onboardingCompleted]);
 
-  if (isReady && (!isConnected || !isInternetReachable)) {
-    return <NetworkErrorScreen onRetry={handleRetry} />;
-  }
-
   if (!isReady) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -75,7 +75,7 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -99,6 +99,6 @@ export default function RootLayout() {
           options={{ headerShown: false }}
         />
       </Stack>
-    </View>
+    </SafeAreaView>
   );
 }

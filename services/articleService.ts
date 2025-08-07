@@ -1,109 +1,182 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Article, CreateArticleData, Comment } from '../Types/ArticleType';
+import { supabase } from "@/lib/supabase";
+import { Article, CreateArticleData, Comment } from "../Types/ArticleType";
 
-const ARTICLES_STORAGE_KEY = 'malagasy_articles';
-const LIKED_ARTICLES_STORAGE_KEY = 'liked_articles';
+// Interfaces pour les données Supabase
+interface SupabaseArticle {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string | null;
+  author_name: string;
+  author_avatar: string | null;
+  location: string | null;
+  tags: string[];
+  likes_count: number;
+  images: string[];
+  created_at: string;
+  updated_at: string;
+}
 
-// Données d'exemple pour commencer
-const SAMPLE_ARTICLES: Article[] = [
-  {
-    id: '1',
-    title: 'Mon voyage culinaire à Antananarivo',
-    content: 'Lors de mon séjour dans la capitale malgache, j\'ai découvert des saveurs incroyables. Le romazava que j\'ai goûté chez une famille locale était absolument délicieux. La combinaison des brèdes mafana et de la viande de zébu créait une harmonie parfaite...',
-    author: {
-      name: 'Miora Rakoto',
-    },
-    location: 'Antananarivo',
-    tags: ['romazava', 'cuisine traditionnelle', 'voyage'],
-    likes: 15,
-    comments: [
-      {
-        id: '1',
-        author: { name: 'Hery Andry' },
-        content: 'Merci pour ce partage ! J\'ai envie d\'essayer cette recette.',
-        createdAt: '2024-01-15T10:30:00Z'
-      }
-    ],
-    createdAt: '2024-01-10T14:20:00Z',
-    updatedAt: '2024-01-10T14:20:00Z',
-  },
-  {
-    id: '2',
-    title: 'La préparation du vary amin\'anana en famille',
-    content: 'Hier, j\'ai participé à la préparation du vary amin\'anana avec ma grand-mère. C\'était un moment magique où elle m\'a transmis tous ses secrets. Le choix des brèdes, la cuisson du riz, tout a son importance...',
-    author: {
-      name: 'Faly Razafy',
-    },
-    location: 'Fianarantsoa',
-    tags: ['vary amin\'anana', 'tradition familiale', 'brèdes'],
-    likes: 23,
-    comments: [],
-    createdAt: '2024-01-08T16:45:00Z',
-    updatedAt: '2024-01-08T16:45:00Z',
-  }
-];
+interface SupabaseComment {
+  id: string;
+  article_id: string;
+  author_id: string | null;
+  author_name: string;
+  author_avatar: string | null;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
 
 class ArticleService {
-  // Récupérer tous les articles
-  async getAllArticles(): Promise<Article[]> {
-    try {
-      const articlesJson = await AsyncStorage.getItem(ARTICLES_STORAGE_KEY);
-      if (articlesJson) {
-        const articles = JSON.parse(articlesJson);
-        return await this.addLikeStatus(articles);
-      }
-      // Si pas d'articles stockés, utiliser les exemples
-      await this.saveArticles(SAMPLE_ARTICLES);
-      return await this.addLikeStatus(SAMPLE_ARTICLES);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des articles:', error);
-      return [];
-    }
+  // Convertir un article Supabase en Article local
+  private convertSupabaseArticle(
+    supabaseArticle: SupabaseArticle,
+    comments: SupabaseComment[] = [],
+    isLikedByUser: boolean = false
+  ): Article {
+    return {
+      id: supabaseArticle.id,
+      title: supabaseArticle.title,
+      content: supabaseArticle.content,
+      author: {
+        id: supabaseArticle.author_id || "anonymous",
+        name: supabaseArticle.author_name,
+        avatar: supabaseArticle.author_avatar
+          ? { uri: supabaseArticle.author_avatar }
+          : undefined,
+      },
+      location: supabaseArticle.location || undefined,
+      tags: supabaseArticle.tags,
+      likes: supabaseArticle.likes_count,
+      images: supabaseArticle.images,
+      createdAt: supabaseArticle.created_at,
+      updatedAt: supabaseArticle.updated_at,
+      comments: comments.map((comment) => ({
+        id: comment.id,
+        author: {
+          id: comment.author_id || "anonymous",
+          name: comment.author_name,
+          avatar: comment.author_avatar
+            ? { uri: comment.author_avatar }
+            : undefined,
+        },
+        content: comment.content,
+        createdAt: comment.created_at,
+      })),
+      isLikedByUser,
+    };
   }
 
-  // Ajouter le statut "aimé" aux articles
-  private async addLikeStatus(articles: Article[]): Promise<Article[]> {
+  // Récupérer tous les articles avec leurs commentaires
+  async getAllArticles(): Promise<Article[]> {
     try {
-      const likedArticlesJson = await AsyncStorage.getItem(LIKED_ARTICLES_STORAGE_KEY);
-      const likedArticles = likedArticlesJson ? JSON.parse(likedArticlesJson) : [];
-      
-      return articles.map(article => ({
-        ...article,
-        isLikedByUser: likedArticles.includes(article.id)
-      }));
+      // Récupérer les articles
+      const { data: articles, error: articlesError } = await supabase
+        .from("articles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (articlesError) {
+        console.error(
+          "Erreur lors de la récupération des articles:",
+          articlesError
+        );
+        return [];
+      }
+
+      if (!articles || articles.length === 0) {
+        return [];
+      }
+
+      // Récupérer tous les commentaires pour ces articles
+      const articleIds = articles.map((article) => article.id);
+      const { data: comments, error: commentsError } = await supabase
+        .from("comments")
+        .select("*")
+        .in("article_id", articleIds)
+        .order("created_at", { ascending: true });
+
+      if (commentsError) {
+        console.error(
+          "Erreur lors de la récupération des commentaires:",
+          commentsError
+        );
+      }
+
+      // Récupérer les likes de l'utilisateur actuel (si connecté)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      let userLikes: string[] = [];
+
+      if (user) {
+        const { data: likes, error: likesError } = await supabase
+          .from("article_likes")
+          .select("article_id")
+          .eq("user_id", user.id);
+
+        if (!likesError && likes) {
+          userLikes = likes.map((like) => like.article_id);
+        }
+      }
+
+      // Grouper les commentaires par article
+      const commentsByArticle = (comments || []).reduce((acc, comment) => {
+        if (!acc[comment.article_id]) {
+          acc[comment.article_id] = [];
+        }
+        acc[comment.article_id].push(comment);
+        return acc;
+      }, {} as Record<string, SupabaseComment[]>);
+
+      // Convertir et retourner les articles
+      return articles.map((article) =>
+        this.convertSupabaseArticle(
+          article,
+          commentsByArticle[article.id] || [],
+          userLikes.includes(article.id)
+        )
+      );
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du statut like:', error);
-      return articles;
+      console.error("Erreur lors de la récupération des articles:", error);
+      return [];
     }
   }
 
   // Créer un nouvel article
   async createArticle(articleData: CreateArticleData): Promise<Article> {
     try {
-      const articles = await this.getAllArticles();
-      
-      const newArticle: Article = {
-        id: Date.now().toString(),
-        title: articleData.title,
-        content: articleData.content,
-        author: {
-          name: 'Utilisateur', // À remplacer par les vraies données utilisateur
-        },
-        location: articleData.location,
-        tags: articleData.tags,
-        likes: 0,
-        comments: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isLikedByUser: false,
-      };
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const updatedArticles = [newArticle, ...articles];
-      await this.saveArticles(updatedArticles);
-      
-      return newArticle;
+      const { data: article, error } = await supabase
+        .from("articles")
+        .insert({
+          title: articleData.title,
+          content: articleData.content,
+          author_id: user?.id || null,
+          author_name:
+            user?.user_metadata?.full_name ||
+            user?.email ||
+            "Utilisateur anonyme",
+          author_avatar: user?.user_metadata?.avatar_url || null,
+          location: articleData.location,
+          tags: articleData.tags,
+          images: articleData.images || [],
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Erreur lors de la création de l'article:", error);
+        throw error;
+      }
+
+      return this.convertSupabaseArticle(article, [], false);
     } catch (error) {
-      console.error('Erreur lors de la création de l\'article:', error);
+      console.error("Erreur lors de la création de l'article:", error);
       throw error;
     }
   }
@@ -111,82 +184,196 @@ class ArticleService {
   // Liker/unliker un article
   async toggleLike(articleId: string): Promise<void> {
     try {
-      const articles = await this.getAllArticles();
-      const likedArticlesJson = await AsyncStorage.getItem(LIKED_ARTICLES_STORAGE_KEY);
-      let likedArticles = likedArticlesJson ? JSON.parse(likedArticlesJson) : [];
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const articleIndex = articles.findIndex(a => a.id === articleId);
-      if (articleIndex === -1) return;
-
-      const isLiked = likedArticles.includes(articleId);
-      
-      if (isLiked) {
-        // Retirer le like
-        likedArticles = likedArticles.filter((id: string) => id !== articleId);
-        articles[articleIndex].likes = Math.max(0, articles[articleIndex].likes - 1);
-      } else {
-        // Ajouter le like
-        likedArticles.push(articleId);
-        articles[articleIndex].likes += 1;
+      if (!user) {
+        console.warn("Utilisateur non connecté, impossible de liker");
+        return;
       }
 
-      await AsyncStorage.setItem(LIKED_ARTICLES_STORAGE_KEY, JSON.stringify(likedArticles));
-      await this.saveArticles(articles);
+      // Vérifier si l'utilisateur a déjà liké cet article
+      const { data: existingLike } = await supabase
+        .from("article_likes")
+        .select("id")
+        .eq("article_id", articleId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (existingLike) {
+        // Retirer le like
+        const { error: deleteError } = await supabase
+          .from("article_likes")
+          .delete()
+          .eq("article_id", articleId)
+          .eq("user_id", user.id);
+
+        if (deleteError) {
+          console.error("Erreur lors de la suppression du like:", deleteError);
+          throw new Error("Impossible de retirer le like");
+        }
+
+        // Mettre à jour le compteur de likes avec la fonction SQL
+        const { error: updateError } = await supabase.rpc(
+          "update_article_likes_count",
+          { article_id_param: articleId }
+        );
+
+        if (updateError) {
+          console.error(
+            "Erreur lors de la mise à jour du compteur:",
+            updateError
+          );
+        }
+      } else {
+        // Ajouter le like
+        const { error: insertError } = await supabase
+          .from("article_likes")
+          .insert({
+            article_id: articleId,
+            user_id: user.id,
+          });
+
+        if (insertError) {
+          console.error("Erreur lors de l'ajout du like:", insertError);
+          throw new Error("Impossible d'ajouter le like");
+        }
+
+        // Mettre à jour le compteur de likes avec la fonction SQL
+        const { error: updateError } = await supabase.rpc(
+          "update_article_likes_count",
+          { article_id_param: articleId }
+        );
+
+        if (updateError) {
+          console.error(
+            "Erreur lors de la mise à jour du compteur:",
+            updateError
+          );
+        }
+      }
     } catch (error) {
-      console.error('Erreur lors du toggle like:', error);
+      console.error("Erreur lors du toggle like:", error);
+      throw error;
     }
   }
 
   // Ajouter un commentaire
-  async addComment(articleId: string, content: string): Promise<void> {
+  async addComment(articleId: string, content: string): Promise<Comment> {
     try {
-      const articles = await this.getAllArticles();
-      const articleIndex = articles.findIndex(a => a.id === articleId);
-      
-      if (articleIndex === -1) return;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const newComment: Comment = {
-        id: Date.now().toString(),
+      const { data: comment, error } = await supabase
+        .from("comments")
+        .insert({
+          article_id: articleId,
+          author_id: user?.id || null,
+          author_name:
+            user?.user_metadata?.full_name ||
+            user?.email ||
+            "Utilisateur anonyme",
+          author_avatar: user?.user_metadata?.avatar_url || null,
+          content,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Erreur lors de l'ajout du commentaire:", error);
+        throw error;
+      }
+
+      // Convertir le commentaire Supabase en format Article
+      return {
+        id: comment.id,
         author: {
-          name: 'Utilisateur', // À remplacer par les vraies données utilisateur
+          id: comment.author_id || 'anonymous',
+          name: comment.author_name,
+          avatar: comment.author_avatar ? { uri: comment.author_avatar } : undefined,
         },
-        content,
-        createdAt: new Date().toISOString(),
+        content: comment.content,
+        createdAt: comment.created_at,
       };
-
-      articles[articleIndex].comments.push(newComment);
-      articles[articleIndex].updatedAt = new Date().toISOString();
-      
-      await this.saveArticles(articles);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout du commentaire:', error);
+      console.error("Erreur lors de l'ajout du commentaire:", error);
+      throw error;
     }
   }
 
   // Rechercher des articles
   async searchArticles(query: string): Promise<Article[]> {
     try {
-      const articles = await this.getAllArticles();
       const lowercaseQuery = query.toLowerCase();
-      
-      return articles.filter(article =>
-        article.title.toLowerCase().includes(lowercaseQuery) ||
-        article.content.toLowerCase().includes(lowercaseQuery) ||
-        article.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
-        (article.location && article.location.toLowerCase().includes(lowercaseQuery))
+
+      // Recherche dans les articles avec une requête PostgreSQL
+      const { data: articles, error: articlesError } = await supabase
+        .from("articles")
+        .select("*")
+        .or(
+          `title.ilike.%${query}%,content.ilike.%${query}%,location.ilike.%${query}%`
+        )
+        .order("created_at", { ascending: false });
+
+      if (articlesError) {
+        console.error(
+          "Erreur lors de la recherche des articles:",
+          articlesError
+        );
+        return [];
+      }
+
+      if (!articles || articles.length === 0) {
+        return [];
+      }
+
+      // Récupérer les commentaires pour ces articles
+      const articleIds = articles.map((article) => article.id);
+      const { data: comments } = await supabase
+        .from("comments")
+        .select("*")
+        .in("article_id", articleIds)
+        .order("created_at", { ascending: true });
+
+      // Récupérer les likes de l'utilisateur actuel
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      let userLikes: string[] = [];
+
+      if (user) {
+        const { data: likes } = await supabase
+          .from("article_likes")
+          .select("article_id")
+          .eq("user_id", user.id);
+
+        if (likes) {
+          userLikes = likes.map((like) => like.article_id);
+        }
+      }
+
+      // Grouper les commentaires par article
+      const commentsByArticle = (comments || []).reduce((acc, comment) => {
+        if (!acc[comment.article_id]) {
+          acc[comment.article_id] = [];
+        }
+        acc[comment.article_id].push(comment);
+        return acc;
+      }, {} as Record<string, SupabaseComment[]>);
+
+      // Convertir et retourner les articles
+      return articles.map((article) =>
+        this.convertSupabaseArticle(
+          article,
+          commentsByArticle[article.id] || [],
+          userLikes.includes(article.id)
+        )
       );
     } catch (error) {
-      console.error('Erreur lors de la recherche:', error);
+      console.error("Erreur lors de la recherche:", error);
       return [];
-    }
-  }
-
-  // Sauvegarder les articles
-  private async saveArticles(articles: Article[]): Promise<void> {
-    try {
-      await AsyncStorage.setItem(ARTICLES_STORAGE_KEY, JSON.stringify(articles));
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde des articles:', error);
     }
   }
 }

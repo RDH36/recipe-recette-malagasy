@@ -1,35 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { articleService } from "../../services/articleService";
+import { useMemo } from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useRealtimeArticles } from "../../hooks/useRealtimeArticles";
 import { Article } from "../../Types/ArticleType";
 
 export default function CommunitySection() {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { articles: allArticles, loading } = useRealtimeArticles();
 
-  useEffect(() => {
-    loadRecentArticles();
-  }, []);
-
-  const loadRecentArticles = async () => {
-    try {
-      const allArticles = await articleService.getAllArticles();
-      // Prendre les 3 articles les plus récents
-      const recentArticles = allArticles
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )
-        .slice(0, 3);
-      setArticles(recentArticles);
-    } catch (error) {
-      console.error("Erreur lors du chargement des articles:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Calculer les 3 articles les plus récents
+  const recentArticles = useMemo(() => {
+    return allArticles
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 3);
+  }, [allArticles]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -49,7 +36,7 @@ export default function CommunitySection() {
     return content.substring(0, maxLength) + "...";
   };
 
-  if (loading || articles.length === 0) {
+  if (loading || recentArticles.length === 0) {
     return null;
   }
 
@@ -84,7 +71,7 @@ export default function CommunitySection() {
         className="space-x-3"
         contentContainerStyle={{ paddingRight: 16 }}
       >
-        {articles.map((article, index) => (
+        {recentArticles.map((article: Article, index: number) => (
           <TouchableOpacity
             key={article.id}
             onPress={() =>
@@ -94,11 +81,19 @@ export default function CommunitySection() {
           >
             {/* Header de l'article */}
             <View className="flex-row items-center mb-3">
-              <View className="w-8 h-8 bg-orange-100 rounded-full items-center justify-center">
-                <Text className="text-orange-600 font-bold text-sm">
-                  {article.author.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
+              {article.author.avatar ? (
+                <Image
+                  source={typeof article.author.avatar === 'string' ? { uri: article.author.avatar } : article.author.avatar}
+                  className="w-8 h-8 rounded-full"
+                  style={{ resizeMode: 'cover' }}
+                />
+              ) : (
+                <View className="w-8 h-8 bg-orange-100 rounded-full items-center justify-center">
+                  <Text className="text-orange-600 font-bold text-sm">
+                    {article.author.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
               <View className="flex-1 ml-2">
                 <Text className="font-semibold text-gray-900 text-sm">
                   {article.author.name}
@@ -135,7 +130,7 @@ export default function CommunitySection() {
             {/* Tags (max 2) */}
             {article.tags.length > 0 && (
               <View className="flex-row flex-wrap mb-3">
-                {article.tags.slice(0, 2).map((tag, tagIndex) => (
+                {article.tags.slice(0, 2).map((tag: string, tagIndex: number) => (
                   <View
                     key={tagIndex}
                     className="bg-orange-50 px-2 py-1 rounded-full mr-1 mb-1"

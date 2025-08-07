@@ -41,5 +41,4 @@ android/
 ios/
 
 # EAS Build
-/eas.json
 /google-services.json
