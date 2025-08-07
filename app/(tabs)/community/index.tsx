@@ -1,10 +1,10 @@
 import CookingLoader from "@/components/Loading/CookingLoader";
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
   RefreshControl,
+  SafeAreaView,
   View,
 } from "react-native";
 import ArticleCard from "../../../components/Community/ArticleCard";
@@ -71,9 +71,7 @@ export default function CommunityScreen() {
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="dark" />
-
+    <SafeAreaView className="flex-1 bg-white">
       <CommunityHeader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -109,6 +107,6 @@ export default function CommunityScreen() {
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
