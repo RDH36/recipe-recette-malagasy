@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import AddCommentForm from "../../../../components/Article/AddCommentForm";
 import ArticleActions from "../../../../components/Article/ArticleActions";
@@ -26,6 +26,13 @@ export default function ArticleDetailScreen() {
   const { article, loading, setArticle } = useRealtimeArticle(id);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [pendingComments, setPendingComments] = useState<PendingComment[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setCurrentUserId(user?.id ?? null);
+    });
+  }, []);
 
   const handleLike = async () => {
     if (!article) return;
@@ -113,7 +120,36 @@ export default function ArticleDetailScreen() {
   return (
     <View className="flex-1 bg-white">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <ArticleHeader article={article} />
+        <ArticleHeader
+          article={article}
+          canDelete={article.author.id === currentUserId}
+          onDelete={() => {
+            if (!article) return;
+            Alert.alert(
+              "Supprimer l'article",
+              "Cette action est irréversible. Voulez-vous vraiment supprimer cet article ?",
+              [
+                { text: "Annuler", style: "cancel" },
+                {
+                  text: "Supprimer",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await articleService.deleteArticle(article.id);
+                      Alert.alert("Supprimé", "L'article a été supprimé.");
+                      router.back();
+                    } catch (e) {
+                      Alert.alert(
+                        "Erreur",
+                        "Impossible de supprimer l'article."
+                      );
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+        />
 
         <View className="px-4">
           <ArticleActions article={article} onLike={handleLike} />

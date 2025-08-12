@@ -303,6 +303,129 @@ class ArticleService {
     }
   }
 
+  // Supprimer un article (et ses dépendances)
+  async deleteArticle(articleId: string): Promise<void> {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("Utilisateur non connecté");
+      }
+
+      // 1) Tentative via RPC (si vous avez créé la fonction côté DB)
+      const { error: rpcError } = await supabase.rpc("delete_article", {
+        article_id_param: articleId,
+      });
+
+      if (!rpcError) {
+        return; // supprimé via RPC
+      }
+
+      // 2) Fallback client: supprimer enfants puis l'article (soumis aux politiques RLS)
+      const { error: likesError } = await supabase
+        .from("article_likes")
+        .delete()
+        .eq("article_id", articleId);
+      if (likesError) {
+        console.warn("Suppression des likes (fallback) échouée:", likesError);
+      }
+
+      const { error: commentsError } = await supabase
+        .from("comments")
+        .delete()
+        .eq("article_id", articleId);
+      if (commentsError) {
+        console.warn(
+          "Suppression des commentaires (fallback) échouée:",
+          commentsError
+        );
+      }
+
+      const { error: articleError } = await supabase
+        .from("articles")
+        .delete()
+        .eq("id", articleId)
+        .eq("author_id", user.id); // sécurité côté client
+
+      if (articleError) {
+        throw articleError;
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'article:", error);
+      throw error;
+    }
+  }
+
+  // Supprimer toutes les données de l'utilisateur courant (articles, likes, commentaires)
+  async deleteCurrentUserData(): Promise<void> {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("Utilisateur non connecté");
+      }
+
+      // 1) Tentative via RPC (recommandé pour contourner RLS proprement)
+      const { error: rpcError } = await supabase.rpc("delete_user_data", {
+        user_id_param: user.id,
+      });
+
+      if (!rpcError) {
+        return; // supprimé via RPC
+      }
+
+      // 2) Fallback client (peut échouer selon vos politiques RLS)
+      // Supprimer les likes faits par l'utilisateur
+      await supabase.from("article_likes").delete().eq("user_id", user.id);
+
+      // Récupérer les articles de l'utilisateur
+      const { data: myArticles, error: fetchArticlesError } = await supabase
+        .from("articles")
+        .select("id")
+        .eq("author_id", user.id);
+      if (fetchArticlesError) {
+        console.warn(
+          "Récupération des articles de l'utilisateur échouée:",
+          fetchArticlesError
+        );
+      }
+
+      const articleIds: string[] = (myArticles || []).map((a: any) => a.id);
+      if (articleIds.length > 0) {
+        // Supprimer les likes et commentaires liés à ces articles
+        await supabase
+          .from("article_likes")
+          .delete()
+          .in("article_id", articleIds);
+
+        await supabase
+          .from("comments")
+          .delete()
+          .in("article_id", articleIds);
+
+        // Supprimer les articles
+        await supabase
+          .from("articles")
+          .delete()
+          .in("id", articleIds)
+          .eq("author_id", user.id);
+      }
+
+      // Supprimer les commentaires écrits par l'utilisateur ailleurs
+      await supabase.from("comments").delete().eq("author_id", user.id);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la suppression des données utilisateur:",
+        error
+      );
+      throw error;
+    }
+  }
+
   // Rechercher des articles
   async searchArticles(query: string): Promise<Article[]> {
     try {

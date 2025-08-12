@@ -5,9 +5,11 @@ import { Article } from "../../Types/ArticleType";
 
 interface ArticleHeaderProps {
   article: Article;
+  canDelete?: boolean;
+  onDelete?: () => void;
 }
 
-export default function ArticleHeader({ article }: ArticleHeaderProps) {
+export default function ArticleHeader({ article, canDelete = false, onDelete }: ArticleHeaderProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("fr-FR", {
@@ -28,7 +30,17 @@ export default function ArticleHeader({ article }: ArticleHeaderProps) {
           <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text className="text-lg font-semibold text-gray-800">Article</Text>
-        <View className="w-10" />
+        {canDelete ? (
+          <TouchableOpacity
+            onPress={onDelete}
+            className="p-2 rounded-full bg-red-50"
+            accessibilityLabel="Supprimer l'article"
+          >
+            <Ionicons name="trash-outline" size={22} color="#EF4444" />
+          </TouchableOpacity>
+        ) : (
+          <View className="w-10" />
+        )}
       </View>
 
       {/* Image principale */}

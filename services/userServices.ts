@@ -12,6 +12,35 @@ export interface User {
 }
 
 /**
+ * Récupère un utilisateur par son ID
+ * @param userId ID de l'utilisateur
+ * @returns L'utilisateur ou null si non trouvé
+ */
+export const getUserById = async (userId: string): Promise<User | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        // Utilisateur non trouvé
+        return null;
+      }
+      console.error("Erreur lors de la récupération de l'utilisateur:", error);
+      return null;
+    }
+
+    return data as User;
+  } catch (error) {
+    console.error("Erreur inattendue:", error);
+    return null;
+  }
+};
+
+/**
  * Crée ou met à jour un utilisateur après authentification Google
  * @param userId ID de l'utilisateur provenant de Supabase Auth
  * @param email Email de l'utilisateur

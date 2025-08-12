@@ -1,66 +1,28 @@
-import { supabase } from "@/lib/supabase";
-import { createOrUpdateUser } from "@/services/userServices";
-import {
-  GoogleSignin,
-  isErrorWithCode,
-  isSuccessResponse,
-  statusCodes,
-} from "@react-native-google-signin/google-signin";
-import { Image, Text, TouchableOpacity } from "react-native";
+import { Linking, Text, TouchableOpacity, View } from "react-native";
+import EmailPasswordForm from "./EmailPasswordForm";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 export default function Auth() {
-  GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID,
-  });
-
-  const signIn = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-      if (isSuccessResponse(response)) {
-        if (response.data.idToken) {
-          const { data, error } = await supabase.auth.signInWithIdToken({
-            provider: "google",
-            token: response.data.idToken,
-          });
-          if (error) {
-          }
-          if (data && data.user) {
-            await createOrUpdateUser(data.user.id, data.user.email || "");
-          }
-        }
-      } else {
-      }
-    } catch (error) {
-      if (isErrorWithCode(error)) {
-        switch (error.code) {
-          case statusCodes.IN_PROGRESS:
-            // operation (eg. sign in) already in progress
-            break;
-          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            // Android only, play services not available or outdated
-            break;
-          default:
-          // some other error happened
-        }
-      } else {
-        console.log("an error that's not related to google sign in occurred");
-      }
-    }
+  const handlePrivacyPress = () => {
+    Linking.openURL("https://www.tsikonina.com/privacy");
   };
 
   return (
-    <TouchableOpacity
-      onPress={signIn}
-      className="bg-neutral-white py-4 rounded-2xl flex-row items-center justify-center shadow-lg"
-    >
-      <Image
-        source={require("@/assets/icons/google.png")}
-        className="w-5 h-5 mr-3"
-      />
-      <Text className="text-text-primary font-semibold text-base">
-        Continuer avec Google
-      </Text>
-    </TouchableOpacity>
+    <View className="w-full">
+      <EmailPasswordForm />
+      <GoogleSignInButton />
+
+      {/* Privacy Policy Link */}
+      <View className="mt-6 px-4 flex-row items-center justify-center gap-2">
+        <Text className="text-center text-text-secondary text-xs leading-5">
+          En vous connectant, vous acceptez nos
+        </Text>
+        <TouchableOpacity onPress={handlePrivacyPress}>
+          <Text className="text-primary text-xs underline">
+            Conditions d'utilisation et Politique de confidentialité
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }

@@ -23,10 +23,6 @@ export default function RootLayout() {
     boolean | null
   >(null);
 
-  if (!isConnected || !isInternetReachable) {
-    return <NetworkErrorScreen onRetry={handleRetry} />;
-  }
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -65,6 +61,10 @@ export default function RootLayout() {
       router.replace("/onboarding");
     }
   }, [isReady, onboardingCompleted]);
+
+  if ((!isConnected || !isInternetReachable) && isReady) {
+    return <NetworkErrorScreen onRetry={handleRetry} />;
+  }
 
   if (!isReady) {
     return (
